@@ -27,6 +27,8 @@
 | `docker build --platform linux/amd64 -t rebuilder-evergreen-tvevents:dev .` | Build container image |
 | `docker compose up` | Run locally |
 | `uvicorn tvevents.main:app --reload --port 8000` | Run dev server |
+| `./scripts/e2e-smoke.sh` | Run e2e smoke tests (full stack) |
+| `./scripts/e2e-smoke.sh --keep` | Run e2e smoke tests, leave stack running |
 
 ## CI/CD
 

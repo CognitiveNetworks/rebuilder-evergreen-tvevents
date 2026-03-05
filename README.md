@@ -79,6 +79,39 @@ uvicorn tvevents.main:app --reload --port 8000
 | `mypy src/ --strict` | Type check |
 | `docker compose up -d` | Start local stack |
 | `uvicorn tvevents.main:app --reload` | Run API locally |
+| `./scripts/e2e-smoke.sh` | Run e2e smoke tests (builds stack, tests, tears down) |
+| `./scripts/e2e-smoke.sh --keep` | Run e2e smoke tests, leave stack running |
+| `./scripts/e2e-smoke.sh --down` | Tear down the Docker Compose stack |
+
+## Testing
+
+### Unit Tests
+
+```bash
+pytest -v
+```
+
+Unit tests use mocked services (Kafka, RDS, Redis) and don't require Docker.
+
+### E2E Smoke Tests
+
+```bash
+./scripts/e2e-smoke.sh
+```
+
+Builds and starts the full Docker Compose stack (API, Postgres, Redis, Kafka, OTEL Collector), then exercises **37 checks** across all endpoint categories:
+
+- Health check with dependency verification (Kafka, RDS, Redis)
+- All 4 event types: ACR_TUNER_DATA, PLATFORM_TELEMETRY, NATIVEAPP_TELEMETRY, Heartbeat
+- HMAC validation (valid + invalid)
+- Missing required parameter rejection
+- Kafka delivery verification (reads from topic)
+- Blacklist/obfuscation flow
+- All 6 diagnostic endpoints (`/ops/status`, `/ops/metrics`, etc.)
+- All 5 remediation endpoints (drain, cache flush, circuits, log level, scale)
+- OpenAPI spec availability
+
+Use `--keep` to leave the stack running for manual exploration, `--down` to tear it down.
 
 ## API Endpoints
 
