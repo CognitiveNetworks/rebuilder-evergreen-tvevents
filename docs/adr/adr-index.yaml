@@ -1,0 +1,40 @@
+adrs:
+  - number: "ADR-001"
+    title: "Use Python 3.12 and FastAPI"
+    prd_sections: ["Technical Approach"]
+    topics: ["python", "fastapi", "framework", "flask replacement"]
+
+  - number: "ADR-002"
+    title: "Use Apache Kafka for Event Delivery"
+    prd_sections: ["Technical Approach", "Event Delivery"]
+    topics: ["kafka", "event streaming", "kinesis replacement", "confluent-kafka"]
+
+  - number: "ADR-003"
+    title: "Keep PostgreSQL via asyncpg"
+    prd_sections: ["Technical Approach", "Data Storage"]
+    topics: ["postgresql", "asyncpg", "database", "connection pooling", "rds"]
+
+  - number: "ADR-004"
+    title: "Standalone Redis Module for Caching"
+    prd_sections: ["Technical Approach", "Caching"]
+    topics: ["redis", "caching", "shared module", "elasticache", "blacklist cache"]
+
+  - number: "ADR-005"
+    title: "Standalone HMAC Validation"
+    prd_sections: ["Technical Approach", "Security"]
+    topics: ["hmac", "authentication", "security", "cnlib removal", "token validation"]
+
+  - number: "ADR-006"
+    title: "Use Terraform for Infrastructure-as-Code"
+    prd_sections: ["Infrastructure", "Technical Approach"]
+    topics: ["terraform", "infrastructure-as-code", "iac", "helm", "aws provisioning"]
+
+  - number: "ADR-007"
+    title: "Stay on AWS"
+    prd_sections: ["Infrastructure"]
+    topics: ["aws", "cloud provider", "eks", "rds", "elasticache", "msk"]
+
+  - number: "ADR-008"
+    title: "OTEL Collector for Observability"
+    prd_sections: ["Observability", "Technical Approach"]
+    topics: ["opentelemetry", "otel", "observability", "traces", "metrics", "logs", "vendor neutral"]

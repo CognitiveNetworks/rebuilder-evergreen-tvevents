@@ -1,0 +1,69 @@
+[build-system]
+requires = ["setuptools>=75.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rebuilder-evergreen-tvevents"
+version = "1.0.0"
+description = "FastAPI TV event ingestion service — rebuilt from evergreen-tvevents"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "pydantic>=2.10",
+    "pydantic-settings>=2.7",
+    "asyncpg>=0.30",
+    "confluent-kafka>=2.6",
+    "httpx>=0.28",
+    "jsonschema>=4.23",
+    "rebuilder-redis-module>=1.0.0",
+    "opentelemetry-api>=1.28",
+    "opentelemetry-sdk>=1.28",
+    "opentelemetry-exporter-otlp>=1.28",
+    "opentelemetry-instrumentation-fastapi>=0.49b0",
+    "opentelemetry-instrumentation-asyncpg>=0.49b0",
+    "opentelemetry-instrumentation-logging>=0.49b0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+    "pytest-cov>=6.0",
+    "httpx>=0.28",
+    "fakeredis[lua]>=2.26",
+    "mypy>=1.13",
+    "ruff>=0.8",
+    "radon>=6.0",
+    "vulture>=2.14",
+    "pip-audit>=2.7",
+    "interrogate>=1.7",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+addopts = "-v --tb=short"
+
+[tool.mypy]
+strict = true
+python_version = "3.12"
+plugins = ["pydantic.mypy"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 99
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "B", "A", "C4", "SIM", "TCH", "C901"]
+
+[tool.coverage.run]
+source = ["tvevents"]
+omit = ["tests/*"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 80

@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=75.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rebuilder-redis-module"
+version = "1.0.0"
+description = "Standalone async Redis client module for Vizio rebuilder services"
+requires-python = ">=3.12"
+dependencies = [
+    "redis[hiredis]>=5.2",
+    "pydantic>=2.10",
+    "pydantic-settings>=2.7",
+    "opentelemetry-api>=1.28",
+    "opentelemetry-sdk>=1.28",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+    "fakeredis[lua]>=2.26",
+    "mypy>=1.13",
+    "ruff>=0.8",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.mypy]
+strict = true
+python_version = "3.12"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 99
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "B", "A", "C4", "SIM", "TCH"]
