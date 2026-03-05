@@ -5,12 +5,16 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      platforms:
-        - linux/amd64
     ports:
       - "8000:8000"
     env_file:
       - .env
+    environment:
+      # Override localhost refs for Docker networking
+      RDS_HOST: postgres
+      REDIS_HOST: redis
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
     depends_on:
       redis:
         condition: service_healthy
