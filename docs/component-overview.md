@@ -24,54 +24,33 @@ Gateway and scales from 1 pod (dev) to 300–500 pods (production).
 
 ## Architecture Diagram
 
-```
-                        ┌───────────────────────────┐
-                        │   Vizio SmartCast TVs      │
-                        │   (millions of devices)    │
-                        └────────────┬──────────────┘
-                                     │ POST /?tvid=...&h=...&event_type=...
-                                     ▼
-                        ┌───────────────────────────┐
-                        │     Kong API Gateway       │
-                        └────────────┬──────────────┘
-                                     │
-                                     ▼
-┌────────────────────────────────────────────────────────────────────┐
-│  AWS EKS  (1–500 pods)                                             │
-│                                                                    │
-│  ┌──────────────────────────────────────────────────────────────┐  │
-│  │  Gunicorn + gevent  (port 8000)                              │  │
-│  │                                                              │  │
-│  │  ┌──────────┐   ┌───────────┐   ┌──────────────┐            │  │
-│  │  │ routes.py│──▶│  utils.py │──▶│ event_type.py│            │  │
-│  │  │ POST /   │   │ validate  │   │ ACR_TUNER    │            │  │
-│  │  │ GET /stat│   │ transform │   │ PLATFORM_TEL │            │  │
-│  │  └──────────┘   │ obfuscate │   │ NATIVEAPP_TEL│            │  │
-│  │                  │ deliver   │   └──────────────┘            │  │
-│  │                  └─────┬─────┘                               │  │
-│  │                        │                                     │  │
-│  │            ┌───────────┼────────────┐                        │  │
-│  │            ▼           ▼            ▼                        │  │
-│  │  ┌─────────────┐ ┌──────────┐ ┌──────────────────┐          │  │
-│  │  │ dbhelper.py  │ │  cnlib   │ │   cnlib          │          │  │
-│  │  │ blacklist    │ │ firehose │ │   token_hash     │          │  │
-│  │  │ lookup+cache │ │ .send()  │ │   .hash_match()  │          │  │
-│  │  └──────┬───────┘ └────┬─────┘ └──────────────────┘          │  │
-│  └─────────┼──────────────┼─────────────────────────────────────┘  │
-│            │              │                                        │
-└────────────┼──────────────┼────────────────────────────────────────┘
-             │              │
-             ▼              ▼
-  ┌──────────────────┐  ┌──────────────────────────────────────┐
-  │ AWS RDS Postgres  │  │ AWS Kinesis Data Firehose            │
-  │ blacklisted_      │  │  evergreen / legacy / debug streams  │
-  │ station_channel_  │  └─────────────────┬────────────────────┘
-  │ map (read-only)   │                    │
-  └──────────────────┘                    ▼
-                              ┌─────────────────────┐
-                              │  S3 Data Lake        │
-                              │  cn-tvevents/<zoo>/  │
-                              └─────────────────────┘
+```mermaid
+flowchart TD
+    TVs["Vizio SmartCast TVs<br/>(millions of devices)"]
+    Kong["Kong API Gateway"]
+
+    TVs -- "POST /?tvid=...&h=...&event_type=..." --> Kong
+    Kong --> EKS
+
+    subgraph EKS["AWS EKS (1–500 pods)"]
+        subgraph Gunicorn["Gunicorn + gevent (port 8000)"]
+            routes["routes.py<br/>POST / &nbsp;|&nbsp; GET /status"]
+            utils["utils.py<br/>validate · transform<br/>obfuscate · deliver"]
+            etypes["event_type.py<br/>ACR_TUNER · PLATFORM_TEL<br/>NATIVEAPP_TEL"]
+            routes --> utils --> etypes
+            utils --> dbhelper
+            utils --> firehose
+            utils --> tokenhash
+
+            dbhelper["dbhelper.py<br/>blacklist lookup + cache"]
+            firehose["cnlib firehose<br/>.send()"]
+            tokenhash["cnlib token_hash<br/>.hash_match()"]
+        end
+    end
+
+    dbhelper --> RDS["AWS RDS Postgres<br/>blacklisted_station_channel_map<br/>(read-only)"]
+    firehose --> Firehose["AWS Kinesis Data Firehose<br/>evergreen / legacy / debug streams"]
+    Firehose --> S3["S3 Data Lake<br/>cn-tvevents/&lt;zoo&gt;/"]
 ```
 
 ## Data Flow
