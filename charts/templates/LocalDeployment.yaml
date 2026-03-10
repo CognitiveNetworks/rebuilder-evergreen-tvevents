@@ -1,0 +1,171 @@
+{{- if .Values.localDev.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.name }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    {{- include "tvevents.annotations" . | nindent 4 }}
+  labels:
+    {{- include "tvevents.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.minReplicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        {{- include "tvevents.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: kafka-writer
+      containers:
+        - name: {{ .Values.name }}
+          image: {{ .Values.localDev.local_repository }}:{{ .Values.localDev.local_tag }}
+          ports:
+            - containerPort: {{ .Values.service.targetPort }}
+          env:
+            - name: AWS_REGION
+              value: {{ .Values.localDev.aws_region }}
+            - name: BLACKLIST_CACHE_FILEPATH
+              value: "{{ .Values.env.BLACKLIST_CACHE_FILEPATH }}"
+            - name: ENV
+              value: "{{ .Values.localDev.env }}"
+            - name: UVICORN_WORKERS
+              value: "{{ .Values.env.UVICORN_WORKERS }}"
+            # Kafka topics
+            - name: KAFKA_TOPIC_EVERGREEN
+              value: "{{ .Values.env.KAFKA_TOPIC_EVERGREEN }}"
+            - name: KAFKA_TOPIC_LEGACY
+              value: "{{ .Values.env.KAFKA_TOPIC_LEGACY }}"
+            - name: KAFKA_TOPIC_DEBUG_EVERGREEN
+              value: "{{ .Values.env.KAFKA_TOPIC_DEBUG_EVERGREEN }}"
+            - name: KAFKA_TOPIC_DEBUG_LEGACY
+              value: "{{ .Values.env.KAFKA_TOPIC_DEBUG_LEGACY }}"
+            - name: KAFKA_SECURITY_PROTOCOL
+              value: "{{ .Values.env.KAFKA_SECURITY_PROTOCOL }}"
+            - name: KAFKA_SASL_MECHANISM
+              value: "{{ .Values.env.KAFKA_SASL_MECHANISM }}"
+            - name: TVEVENTS_DEBUG
+              value: "{{ .Values.env.TVEVENTS_DEBUG }}"
+            - name: SEND_EVERGREEN
+              value: "{{ .Values.env.SEND_EVERGREEN }}"
+            - name: SEND_LEGACY
+              value: "{{ .Values.env.SEND_LEGACY }}"
+            - name: LOG_LEVEL
+              value: "{{ .Values.env.LOG_LEVEL }}"
+            - name: TEST_CONTAINER
+              value: "{{ .Values.env.TEST_CONTAINER }}"
+            - name: SERVICE_NAME
+              value: "{{ include "tvevents.serviceName" . }}"
+            - name: OTEL_SERVICE_NAME
+              value: "{{ include "tvevents.serviceName" . }}"
+            # OTEL configuration
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: "{{ .Values.otel.OTEL_EXPORTER_OTLP_PROTOCOL }}"
+            - name: OTEL_PYTHON_LOG_CORRELATION
+              value: "{{ .Values.otel.OTEL_PYTHON_LOG_CORRELATION }}"
+            - name: OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_REQUEST
+              value: "{{ .Values.otel.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_REQUEST }}"
+            - name: OTEL_PYTHON_LOG_FORMAT
+              value: "{{ .Values.otel.OTEL_PYTHON_LOG_FORMAT }}"
+            - name: OTEL_EXPORTER_OTLP_COMPRESSION
+              value: "{{ .Values.otel.OTEL_EXPORTER_OTLP_COMPRESSION }}"
+            - name: OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT
+              value: "{{ .Values.otel.OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT }}"
+            - name: OTEL_PYTHON_AUTO_INSTRUMENTATION_ENABLED
+              value: "{{ .Values.localDev.LOCAL_OTEL_PYTHON_AUTO_INSTRUMENTATION_ENABLED }}"
+            # Application secrets from local K8s secret
+            - name: T1_SALT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.localSecrets }}
+                  key: T1_SALT
+            - name: RDS_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.localSecrets }}
+                  key: RDS_HOST
+            - name: RDS_DB
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.localSecrets }}
+                  key: RDS_DB
+            - name: RDS_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.localSecrets }}
+                  key: RDS_USER
+            - name: RDS_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.localSecrets }}
+                  key: RDS_PASS
+            - name: RDS_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.localSecrets }}
+                  key: RDS_PORT
+            # Kafka MSK auth secrets
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.localSecrets }}
+                  key: KAFKA_BOOTSTRAP_SERVERS
+            - name: KAFKA_SASL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.localSecrets }}
+                  key: ACR_DATA_MSK_USERNAME
+            - name: KAFKA_SASL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.localSecrets }}
+                  key: ACR_DATA_MSK_PASSWORD
+            # AWS credentials for local dev
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.localSecrets }}
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.localSecrets }}
+                  key: AWS_SECRET_ACCESS_KEY
+            - name: AWS_SESSION_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.localSecrets }}
+                  key: AWS_SESSION_TOKEN
+            # OTEL secrets
+            - name: OTEL_EXPORTER_OTLP_HEADERS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.localSecrets }}
+                  key: LOCAL_OTEL_EXPORTER_OTLP_HEADERS
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "{{ .Values.localDev.OTEL_EXPORTER_OTLP_ENDPOINT }}"
+            - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+              value: "{{ .Values.localDev.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT }}"
+            - name: OTEL_EXPORTER_OTLP_METRICS_ENDPOINT
+              value: "{{ .Values.localDev.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT }}"
+            - name: OTEL_EXPORTER_OTLP_LOGS_ENDPOINT
+              value: "{{ .Values.localDev.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT }}"
+          resources:
+            requests:
+              memory: "{{ .Values.resources.requests.memory }}"
+              cpu: "{{ .Values.resources.requests.cpu }}"
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.livenessProbe.httpGet.path }}
+              port: {{ .Values.livenessProbe.httpGet.port }}
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.readinessProbe.httpGet.path }}
+              port: {{ .Values.readinessProbe.httpGet.port }}
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+{{- end }}

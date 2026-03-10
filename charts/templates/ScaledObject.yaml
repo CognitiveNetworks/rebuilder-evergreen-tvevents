@@ -1,0 +1,41 @@
+{{- if not .Values.localDev.enabled }}
+
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ .Values.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "tvevents.labels" . | nindent 4 }}
+  annotations:
+    {{- include "tvevents.annotations" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    name: {{ if not .Values.workload_env }}tvevents-pr-{{.Values.pr_number}}{{ else }}{{ .Values.name }}{{ end }}
+  minReplicaCount: {{ include "tvevents.minReplicas" . }}
+  maxReplicaCount: {{ .Values.maxReplicaCount }}
+  advanced:
+    horizontalPodAutoscalerConfig:
+      behavior:
+        scaleUp:
+          stabilizationWindowSeconds: {{ .Values.scaling.behavior.scaleUp.stabilizationWindowSeconds }}
+          policies:
+          {{- range .Values.scaling.behavior.scaleUp.policies }}
+          - type: {{ .type }}
+            value: {{ .value }}
+            periodSeconds: {{ .periodSeconds }}
+          {{- end }}
+        scaleDown:
+          stabilizationWindowSeconds: {{ .Values.scaling.behavior.scaleDown.stabilizationWindowSeconds }}
+          policies:
+          {{- range .Values.scaling.behavior.scaleDown.policies }}
+          - type: {{ .type }}
+            value: {{ .value }}
+            periodSeconds: {{ .periodSeconds }}
+          {{- end }}
+  triggers:
+  - type: cpu
+    metricType: Utilization
+    metadata:
+      value: "{{ .Values.cpuScalingThreshold }}"
+{{- end }}

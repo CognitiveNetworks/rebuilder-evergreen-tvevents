@@ -1,0 +1,21 @@
+apiVersion: configuration.konghq.com/v1beta1
+kind: KongUpstreamPolicy
+metadata:
+  name: {{ .Release.Name }}
+spec:
+  healthchecks:
+    threshold: 30
+    active:
+      healthy:
+        interval: 10
+        successes: 3
+      httpPath: /health
+      timeout: 1
+      type: http
+      unhealthy:
+        interval: 10
+        httpFailures: 1
+        timeouts: 1
+    passive:
+      unhealthy:
+        httpFailures: 3

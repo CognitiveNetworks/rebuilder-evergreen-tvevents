@@ -1,0 +1,6 @@
+name: tvevents-k8s
+version: 1.0.0
+appVersion: "0.1.0"
+description: Helm chart for deploying tvevents-k8s — TV event ingestion service
+apiVersion: v2
+icon: https://www.vizio.com/etc.clientlibs/vizio/clientlibs/2020/favicon/resources/favicon.ico

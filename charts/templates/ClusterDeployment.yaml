@@ -1,0 +1,199 @@
+{{- if not .Values.localDev.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ if not .Values.workload_env }}tvevents-pr-{{default 0 .Values.pr_number}}{{ else }}{{ .Values.name }}{{ end }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    {{- include "tvevents.annotations" . | nindent 4 }}
+  labels:
+    deployment: {{ .Release.Name }}-deployment
+    {{- include "tvevents.labels" . | nindent 4 }}
+spec:
+  strategy:
+    type: {{ .Values.deployment.strategy.type }}
+    rollingUpdate:
+      maxSurge: {{ .Values.deployment.strategy.rollingUpdate.maxSurge }}
+      maxUnavailable: {{ .Values.deployment.strategy.rollingUpdate.maxUnavailable }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      annotations:
+        {{- include "tvevents.annotations" . | nindent 8 }}
+      labels:
+        deployment: {{ .Release.Name }}-deployment
+        {{- include "tvevents.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: kafka-writer
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds}}
+      topologySpreadConstraints:
+      - maxSkew: 3
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app: {{ .Release.Name }}
+      containers:
+        - name: {{ .Values.name }}
+          {{- if eq .Values.environment "dev" }}
+          image: {{ .Values.aws_account_id }}.dkr.ecr.{{ .Values.cloud_region }}.amazonaws.com/inscape-infra-{{.Values.environment}}-tvevents:tvevents-{{.Values.environment}}-{{ .Values.image.dev_sha_ref }}
+          {{- else if eq .Values.environment "staging" }}
+          image: {{ .Values.aws_account_id }}.dkr.ecr.{{ .Values.cloud_region }}.amazonaws.com/inscape-infra-{{.Values.environment}}-tvevents:tvevents-{{.Values.environment}}-{{ .Values.image.staging_sha_ref }}
+          {{- else if eq .Values.environment "prod" }}
+          image: {{ .Values.aws_account_id }}.dkr.ecr.{{ .Values.cloud_region }}.amazonaws.com/inscape-infra-{{.Values.environment}}-tvevents:tvevents-{{.Values.environment}}-{{ .Values.image.prod_sha_ref }}
+          {{- else if eq .Values.environment "qa" }}
+          image: {{ .Values.aws_account_id }}.dkr.ecr.{{ .Values.cloud_region }}.amazonaws.com/inscape-infra-{{.Values.environment}}-tvevents:tvevents-{{.Values.environment}}-{{ .Values.image.qa_sha_ref }}
+          {{- else }}
+          image: {{ .Values.aws_account_id }}.dkr.ecr.{{ .Values.cloud_region }}.amazonaws.com/inscape-infra-{{ .Values.environment }}-tvevents:tvevents-{{ .Values.environment }}-latest
+          {{- end }}
+          ports:
+            - containerPort: {{ .Values.service.targetPort }}
+          env:
+            - name: AWS_REGION
+              value: {{ .Values.cloud_region }}
+            - name: BLACKLIST_CACHE_FILEPATH
+              value: "{{ .Values.env.BLACKLIST_CACHE_FILEPATH }}"
+            - name: ENV
+              value: "{{ .Values.environment }}"
+            - name: UVICORN_WORKERS
+              value: "{{ .Values.env.UVICORN_WORKERS }}"
+            # Kafka topics (replaces Firehose stream names)
+            - name: KAFKA_TOPIC_EVERGREEN
+              value: "{{ .Values.env.KAFKA_TOPIC_EVERGREEN }}"
+            - name: KAFKA_TOPIC_LEGACY
+              value: "{{ .Values.env.KAFKA_TOPIC_LEGACY }}"
+            - name: KAFKA_TOPIC_DEBUG_EVERGREEN
+              value: "{{ .Values.env.KAFKA_TOPIC_DEBUG_EVERGREEN }}"
+            - name: KAFKA_TOPIC_DEBUG_LEGACY
+              value: "{{ .Values.env.KAFKA_TOPIC_DEBUG_LEGACY }}"
+            - name: KAFKA_SECURITY_PROTOCOL
+              value: "{{ .Values.env.KAFKA_SECURITY_PROTOCOL }}"
+            - name: KAFKA_SASL_MECHANISM
+              value: "{{ .Values.env.KAFKA_SASL_MECHANISM }}"
+            - name: TVEVENTS_DEBUG
+              value: "{{ include "tvevents.tvEventsDebug" . }}"
+            - name: SEND_EVERGREEN
+              value: "{{ .Values.env.SEND_EVERGREEN }}"
+            - name: SEND_LEGACY
+              value: "{{ .Values.env.SEND_LEGACY }}"
+            - name: LOG_LEVEL
+              value: "{{ include "tvevents.logLevel" . }}"
+            - name: TEST_CONTAINER
+              value: "{{ .Values.env.TEST_CONTAINER }}"
+            - name: SERVICE_NAME
+              value: "{{ include "tvevents.serviceName" . }}"
+            - name: OTEL_SERVICE_NAME
+              value: "{{ include "tvevents.serviceName" . }}"
+            # OTEL configuration
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: "{{ .Values.otel.OTEL_EXPORTER_OTLP_PROTOCOL }}"
+            - name: OTEL_PYTHON_AUTO_INSTRUMENTATION_ENABLED
+              value: "{{ .Values.otel.OTEL_PYTHON_AUTO_INSTRUMENTATION_ENABLED }}"
+            - name: OTEL_PYTHON_LOG_CORRELATION
+              value: "{{ .Values.otel.OTEL_PYTHON_LOG_CORRELATION }}"
+            - name: OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_REQUEST
+              value: "{{ .Values.otel.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_REQUEST }}"
+            - name: OTEL_PYTHON_LOG_FORMAT
+              value: "{{ .Values.otel.OTEL_PYTHON_LOG_FORMAT }}"
+            - name: OTEL_EXPORTER_OTLP_COMPRESSION
+              value: "{{ .Values.otel.OTEL_EXPORTER_OTLP_COMPRESSION }}"
+            - name: OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT
+              value: "{{ .Values.otel.OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT }}"
+            # Application secrets from AWS Secrets Manager via ExternalSecret
+            - name: T1_SALT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-application-secrets
+                  key: T1_SALT
+            - name: RDS_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-application-secrets
+                  key: RDS_HOST
+            - name: RDS_DB
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-application-secrets
+                  key: RDS_DB
+            - name: RDS_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-application-secrets
+                  key: RDS_USER
+            - name: RDS_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-application-secrets
+                  key: RDS_PASS
+            - name: RDS_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-application-secrets
+                  key: RDS_PORT
+            # Kafka MSK auth secrets
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-application-secrets
+                  key: KAFKA_BOOTSTRAP_SERVERS
+            - name: KAFKA_SASL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-application-secrets
+                  key: ACR_DATA_MSK_USERNAME
+            - name: KAFKA_SASL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-application-secrets
+                  key: ACR_DATA_MSK_PASSWORD
+            # O11y secrets
+            - name: OTEL_EXPORTER_OTLP_HEADERS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-o11y-secrets
+                  key: OTEL_EXPORTER_OTLP_HEADERS
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-o11y-secrets
+                  key: OTEL_EXPORTER_OTLP_ENDPOINT
+            - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-o11y-secrets
+                  key: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+            - name: OTEL_EXPORTER_OTLP_METRICS_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-o11y-secrets
+                  key: OTEL_EXPORTER_OTLP_METRICS_ENDPOINT
+            - name: OTEL_EXPORTER_OTLP_LOGS_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-o11y-secrets
+                  key: OTEL_EXPORTER_OTLP_LOGS_ENDPOINT
+          resources:
+            requests:
+              memory: "{{ .Values.resources.requests.memory }}"
+              cpu: "{{ .Values.resources.requests.cpu }}"
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.livenessProbe.httpGet.path }}
+              port: {{ .Values.livenessProbe.httpGet.port }}
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+            successThreshold: {{ .Values.livenessProbe.successThreshold }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.readinessProbe.httpGet.path }}
+              port: {{ .Values.readinessProbe.httpGet.port }}
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
+{{- end }}

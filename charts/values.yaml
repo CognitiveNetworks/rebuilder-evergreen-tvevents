@@ -1,0 +1,135 @@
+name: tvevents-k8s
+namespace: tvevents-k8s
+
+image:
+  imagePullPolicy: IfNotPresent
+  dev_sha_ref: latest
+  qa_sha_ref: latest
+  staging_sha_ref: latest
+  prod_sha_ref: latest
+
+cpuScalingThreshold: 70
+minReplicaCount: 100
+maxReplicaCount: 200
+
+labels:
+  cost-unit: "inscape-evergreen"
+  function: "tvevents"
+  service: "tvevents"
+  team: "inscape-tvevents"
+
+annotations:
+  created-by: "inscape"
+  repo: "CognitiveNetworks/rebuilder-evergreen-tvevents"
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8000
+
+keyDomain: tvevents/tvcdb
+o11yKeyDomain: inscape/o11y-config
+localSecrets: local-secret-config
+
+localDev:
+  enabled: false
+  aws_region: none
+  env: dev-local
+  local_repository: tvevents-k8s
+  local_tag: v1.0.0
+  AWS_ACCESS_KEY_ID: ""
+  AWS_SECRET_ACCESS_KEY: ""
+  AWS_SESSION_TOKEN: ""
+  AWS_ACCOUNT: ""
+  T1_SALT: ""
+  RDS_HOST: localhost
+  RDS_PASS: postgres
+  RDS_USER: postgres
+  RDS_PORT: "5432"
+  RDS_DB: tvevents
+  LOCAL_OTEL_PYTHON_AUTO_INSTRUMENTATION_ENABLED: "false"
+  LOCAL_OTEL_EXPORTER_OTLP_HEADERS: "api-key=nr-api-key"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "https://otlp.nr-data.net:443"
+  OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: "https://otlp.nr-data.net:443/v1/traces"
+  OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: "https://otlp.nr-data.net:443/v1/metrics"
+  OTEL_EXPORTER_OTLP_LOGS_ENDPOINT: "https://otlp.nr-data.net:443/v1/logs"
+
+otel:
+  OTEL_PYTHON_LOG_FORMAT: "%(asctime)s %(levelname)s [trace_id=%(otelTraceID)s span_id=%(otelSpanID)s] - %(message)s"
+  OTEL_EXPORTER_OTLP_PROTOCOL: "http/protobuf"
+  OTEL_PYTHON_LOG_CORRELATION: "true"
+  OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_REQUEST: "Accept.*,X-.*"
+  OTEL_EXPORTER_OTLP_COMPRESSION: "gzip"
+  OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT: "4095"
+  OTEL_PYTHON_AUTO_INSTRUMENTATION_ENABLED: "true"
+
+env:
+  BLACKLIST_CACHE_FILEPATH: "/tmp/.blacklisted_channel_ids_cache"
+  ENV: "tvevents-k8s"
+  UVICORN_WORKERS: "4"
+  SERVICE_NAME: "tvevents-k8s"
+  LOG_LEVEL: "DEBUG"
+  TVEVENTS_DEBUG: "true"
+  TEST_CONTAINER: "false"
+  SEND_EVERGREEN: "true"
+  SEND_LEGACY: "true"
+  # Kafka topics (replaces Firehose stream names)
+  KAFKA_TOPIC_EVERGREEN: "tveoe-evergreen"
+  KAFKA_TOPIC_LEGACY: "tveoe-legacy"
+  KAFKA_TOPIC_DEBUG_EVERGREEN: "tveoe-debug-evergreen"
+  KAFKA_TOPIC_DEBUG_LEGACY: "tveoe-debug-legacy"
+  KAFKA_SECURITY_PROTOCOL: "SASL_SSL"
+  KAFKA_SASL_MECHANISM: "SCRAM-SHA-512"
+
+resources:
+  requests:
+    memory: "512Mi"
+    cpu: "3500m"
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 8000
+  initialDelaySeconds: 90
+  periodSeconds: 90
+  timeoutSeconds: 10
+  failureThreshold: 3
+  successThreshold: 1
+
+terminationGracePeriodSeconds: 60
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: 8000
+  initialDelaySeconds: 37
+  periodSeconds: 17
+  timeoutSeconds: 5
+  failureThreshold: 5
+  successThreshold: 1
+
+deployment:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 25%
+
+scaling:
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 15
+      - type: Pods
+        value: 8
+        periodSeconds: 15
+      selectPolicy: Max
+    scaleDown:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 25
+        periodSeconds: 30
