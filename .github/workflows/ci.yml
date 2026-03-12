@@ -11,32 +11,14 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Get token from Github App
-        if: ${{ !env.ACT }}
-        uses: actions/create-github-app-token@v1
-        id: app_token
-        with:
-          app-id: ${{ secrets.GH_APP_ID }}
-          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-
       - name: Checkout code
-        if: ${{ !env.ACT }}
-        uses: actions/checkout@v3
-        with:
-          token: ${{ steps.app_token.outputs.token }}
-          submodules: true
-          fetch-depth: 1
-
-      - name: Checkout code
-        if: ${{ env.ACT }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: true
           fetch-depth: 1
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
@@ -58,32 +40,14 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - name: Get token from Github App
-        if: ${{ !env.ACT }}
-        uses: actions/create-github-app-token@v1
-        id: app_token
-        with:
-          app-id: ${{ secrets.GH_APP_ID }}
-          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-
       - name: Checkout code
-        if: ${{ !env.ACT }}
-        uses: actions/checkout@v3
-        with:
-          token: ${{ steps.app_token.outputs.token }}
-          submodules: true
-          fetch-depth: 1
-
-      - name: Checkout code
-        if: ${{ env.ACT }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: true
           fetch-depth: 1
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
@@ -99,7 +63,6 @@ jobs:
         run: pytest
 
       - name: Pytest Coverage Comment
-        if: ${{ !env.ACT }}
         uses: MishaKav/pytest-coverage-comment@main
         with:
           pytest-xml-coverage-path: ./coverage.xml
@@ -111,32 +74,14 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Get token from Github App
-        if: ${{ !env.ACT }}
-        uses: actions/create-github-app-token@v1
-        id: app_token
-        with:
-          app-id: ${{ secrets.GH_APP_ID }}
-          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-
       - name: Checkout code
-        if: ${{ !env.ACT }}
-        uses: actions/checkout@v3
-        with:
-          token: ${{ steps.app_token.outputs.token }}
-          submodules: true
-          fetch-depth: 1
-
-      - name: Checkout code
-        if: ${{ env.ACT }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: true
           fetch-depth: 1
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
@@ -155,32 +100,14 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Get token from Github App
-        if: ${{ !env.ACT }}
-        uses: actions/create-github-app-token@v1
-        id: app_token
-        with:
-          app-id: ${{ secrets.GH_APP_ID }}
-          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-
       - name: Checkout code
-        if: ${{ !env.ACT }}
-        uses: actions/checkout@v3
-        with:
-          token: ${{ steps.app_token.outputs.token }}
-          submodules: true
-          fetch-depth: 1
-
-      - name: Checkout code
-        if: ${{ env.ACT }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: true
           fetch-depth: 1
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
@@ -198,26 +125,8 @@ jobs:
   helm_lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Get token from Github App
-        if: ${{ !env.ACT }}
-        uses: actions/create-github-app-token@v1
-        id: app_token
-        with:
-          app-id: ${{ secrets.GH_APP_ID }}
-          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-
       - name: Checkout code
-        if: ${{ !env.ACT }}
-        uses: actions/checkout@v3
-        with:
-          token: ${{ steps.app_token.outputs.token }}
-          submodules: recursive
-          fetch-depth: 1
-
-      - name: Checkout code act test
-        if: ${{ env.ACT }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 1
@@ -234,26 +143,8 @@ jobs:
   helm_template:
     runs-on: ubuntu-latest
     steps:
-      - name: Get token from Github App
-        if: ${{ !env.ACT }}
-        uses: actions/create-github-app-token@v1
-        id: app_token
-        with:
-          app-id: ${{ secrets.GH_APP_ID }}
-          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-
       - name: Checkout code
-        if: ${{ !env.ACT }}
-        uses: actions/checkout@v3
-        with:
-          token: ${{ steps.app_token.outputs.token }}
-          submodules: recursive
-          fetch-depth: 1
-
-      - name: Checkout code act test
-        if: ${{ env.ACT }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 1
@@ -275,32 +166,14 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Get token from Github App
-        if: ${{ !env.ACT }}
-        uses: actions/create-github-app-token@v1
-        id: app_token
-        with:
-          app-id: ${{ secrets.GH_APP_ID }}
-          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-
       - name: Checkout code
-        if: ${{ !env.ACT }}
-        uses: actions/checkout@v3
-        with:
-          token: ${{ steps.app_token.outputs.token }}
-          submodules: true
-          fetch-depth: 1
-
-      - name: Checkout code
-        if: ${{ env.ACT }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: true
           fetch-depth: 1
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
