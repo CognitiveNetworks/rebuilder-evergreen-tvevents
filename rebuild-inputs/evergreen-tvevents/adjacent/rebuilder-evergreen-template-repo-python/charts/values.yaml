@@ -1,0 +1,286 @@
+# =================================================================
+# MVP CONFIGURATION - Minimal Viable Product
+# Bare minimum config to deploy demo-app without extras
+#
+# REQUIRED TEMPLATES & HELPERS:
+# - charts/templates/Deployment.yaml (uses deployments map)
+# - charts/templates/Service.yaml (uses services map)
+# - charts/templates/HTTPRoute.yaml (uses httproutes map)
+# - charts/templates/_helpers.tpl:
+#   * common.labels - generates standard k8s labels
+#   * resource.suffix - creates unique resource names
+#   * env.type/env.isDev - determines environment type
+#   * image.tag - resolves container image tags
+# - charts/templates/_httproute.tpl:
+#   * resource.hostname - generates hostnames for HTTPRoutes
+# - charts/templates/_env.tpl:
+#   * env.merge - merges environment variables from multiple sources
+# - charts/templates/_metadata.tpl:
+#   * metadata.labels - generates metadata labels for resources
+#   * metadata.annotations - generates metadata annotations
+# =================================================================
+
+# Global configuration
+global:
+  appName: "demo-app"
+  serviceName: "demo-app"
+  hostPrefix: "demo-app"
+  domain: "evergreen.cognet.tv"
+  serviceDomain: "inscape-infra"
+  cloudProvider: "aws"
+
+  # Standard labels
+  labels:
+    environment: "dev"
+    team: "inscape-de"
+    function: "demo-app"
+    service: "demo-app"
+    cost-unit: "inscape-evergreen"
+    version: "1.0.0"
+
+  # Standard annotations
+  annotations:
+    repo: "CognitiveNetworks/evergreen-template-repo-python"
+    created-by: "helm"
+
+
+
+# =================================================================
+# DEPLOYMENT - Single deployment only
+# =================================================================
+deployments:
+  demo-app:
+    enabled: true
+    name: "demo-app"
+    port: 8000
+    portName: "http"
+    # serviceAccountName: demo-app-sa  # Optional: Reference to serviceAccounts below
+    resources:
+      requests:
+        cpu: "200m"
+        memory: "512Mi"
+        ephemeral-storage: "1Gi"
+      limits:
+        cpu: "1000m"
+        memory: "1Gi"
+        ephemeral-storage: "2Gi"
+    probes:
+      liveness:
+        httpGet:
+          path: /status
+          port: 8000
+        initialDelaySeconds: 30
+        periodSeconds: 30
+        timeoutSeconds: 5
+        failureThreshold: 3
+      readiness:
+        httpGet:
+          path: /status
+          port: 8000
+        initialDelaySeconds: 20
+        periodSeconds: 10
+        timeoutSeconds: 5
+        failureThreshold: 3
+    podDisruption:
+      enabled: true
+      maxUnavailable: 1
+      # minAvailable: 1  # Use either maxUnavailable OR minAvailable, not both
+      # unhealthyPodEvictionPolicy: IfHealthyBudget  # Optional: IfHealthyBudget or AlwaysAllow
+    env:
+      # Always required
+      ENV: "dev"
+      LOG_LEVEL: "INFO"
+      FLASK_ENV: "development"
+      AWS_REGION: "us-east-1"
+      TEST_CONTAINER: "false"
+      SERVICE_NAME: "demo-app"
+      # Disable OTEL SDK
+      OTEL_SDK_DISABLED: "true"
+      OTEL_MANUAL_ENABLED: "false"
+      VERY_COOL: "yes"
+      OTEL_PYTHON_AUTO_INSTRUMENTATION_ENABLED: "false"
+
+# =================================================================
+# SERVICE - Single service only
+# =================================================================
+services:
+  demo-app:
+    enabled: true
+    type: ClusterIP
+    port: 80
+    targetPort: 8000
+
+# =================================================================
+# ENVIRONMENT CONFIG - Per-environment deployment configuration
+# =================================================================
+environmentConfig:
+  dev:
+    logLevel: "DEBUG"
+    otel:
+      replicas: 1
+    deployments:
+      demo-app:
+        sha_ref: "44ad9458001fb201f65c728d5ba4ca194940ecd2"
+        replicas: 4
+        # scaledObject:
+        #   enabled: false
+  qa:
+    logLevel: "DEBUG"
+    otel:
+      replicas: 2
+    deployments:
+      demo-app:
+        sha_ref: "latest"
+        replicas: 5
+        scaledObject:
+          enabled: true
+          minReplicaCount: 1
+          maxReplicaCount: 10
+          triggers:
+            - type: cpu
+              metricType: Utilization
+              metadata:
+                value: "80"
+  prod:
+    logLevel: "WARN"
+    otel:
+      replicas: 3
+    deployments:
+      demo-app:
+        sha_ref: "latest"
+        replicas: 100
+        scaledObject:
+          enabled: true
+          minReplicaCount: 50
+          maxReplicaCount: 200
+          triggers:
+            - type: cpu
+              metricType: Utilization
+              metadata:
+                value: "70"
+
+
+
+# =================================================================
+# HTTPROUTE - Ingress routing
+# =================================================================
+httproutes:
+  "evergreen.cognet.tv":
+    enabled: true
+    targetDeployment: "demo-app"
+    parentRefs:
+      - name: evergreen.cognet.tv
+        namespace: evergreen-gateway
+    rules:
+      - backendRefs:
+          - name: demo-app
+            port: 80
+        matches:
+          - path:
+              type: PathPrefix
+              value: /
+
+# =================================================================
+# SECRETS CONFIGURATION
+# External Secret Stores and Secrets
+# =================================================================
+
+# External Secret Stores
+secretstores:
+  demo-app:
+    enabled: true
+    provider: aws
+    region: us-east-1
+    annotations:
+      argocd.argoproj.io/sync-wave: "-2"
+
+# External Secrets
+secrets:
+  demo-app:
+    enabled: true
+    secretStore: demo-app
+    annotations:
+      argocd.argoproj.io/sync-wave: "-1"
+      argocd.argoproj.io/sync-options: "SkipDryRunOnMissingResource=true"
+    name: "demo-app-secrets"
+    path: "/demo-app/application-secrets"
+    syncAll: true  # Sync entire secret instead of scanning for keys
+  otelcollector:
+    enabled: true
+    secretStore: demo-app
+    name: "otel-collector-secrets"
+    path: "/inscape/o11y-config"
+    annotations:
+      argocd.argoproj.io/sync-wave: "-1"
+      argocd.argoproj.io/sync-options: "SkipDryRunOnMissingResource=true"
+
+
+# =================================================================
+# SERVICE ACCOUNTS
+# Kubernetes ServiceAccounts for pod identity and IRSA
+# =================================================================
+# serviceAccounts:
+#   demo-app-sa:
+#     enabled: true
+#     annotations:
+#       eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/demo-app-role
+
+# =================================================================
+# DAPR CONFIGURATION
+# =================================================================
+
+# Dapr Components
+# Links to deployments via dapr.io/app-id annotation in pod metadata
+daprComponents:
+  demo-app:  # Must match deployment name in values-deployment.yaml
+    enabled: true
+    annotations:
+      # These annotations are merged into pod template metadata
+      # Dapr sidecar is injected and configured based on these values
+      dapr.io/enabled: "true"
+      dapr.io/app-id: "inscape-admin-demo-app"  # Unique app identifier for Dapr
+      dapr.io/app-port: "8000"  # Port where application listens
+      dapr.io/log-level: "info"
+    cloudProviders:
+      aws:
+        name: aws
+        components:
+          - name: "object-storage"
+            enabled: true
+            aws:
+              type: "bindings.aws.s3"
+              metadata:
+                - name: "bucket"
+                  value: "demo-app-dapr-bucket"
+                - name: "region"
+                  value: "us-east-1"
+                - name: "accessKey"
+                  secretKeyRef:
+                    name: demo-app-secrets
+                    key: S3_ACCESS_KEY_ID
+                - name: "secretKey"
+                  secretKeyRef:
+                    name: demo-app-secrets
+                    key: S3_SECRET_ACCESS_KEY
+      gcp:
+        name: aws
+        components:
+          - name: "object-storage"
+            enabled: true
+            aws:
+              type: "bindings.aws.s3"
+              metadata:
+                - name: "bucket"
+                  value: "demo-app-dapr-bucket"
+                - name: "region"
+                  value: "us-east-1"
+                - name: "accessKey"
+                  secretKeyRef:
+                    name: demo-app-secrets
+                    key: S3_ACCESS_KEY_ID
+                - name: "secretKey"
+                  secretKeyRef:
+                    name: demo-app-secrets
+                    key: S3_SECRET_ACCESS_KEY
+
+

@@ -1,0 +1,77 @@
+{{/*
+DEPLOYMENT TEMPLATE
+
+Generates Kubernetes Deployment resources for containerized applications.
+
+Configuration:
+- Deployment config: values.yaml -> deployments[name]
+- Environment overrides: environmentConfig[env].deployments[name]
+
+Key Features:
+- Environment-aware replicas and resources
+- Dynamic ECR image URI generation
+- Env var merging (base + environment-specific)
+- Optional Dapr sidecar via pod annotations
+- Health checks (liveness/readiness probes)
+*/}}
+{{- /* Validate configuration placement before rendering any resources */ -}}
+{{- include "validate.configPlacement" . }}
+
+{{- range $deploymentName, $deployment := .Values.deployments }}
+{{- if $deployment.enabled }}
+{{- $env := include "env.name" $ -}}
+{{- $ecrEnv := include "env.ecrEnv" $ -}}
+{{- $shaRef := include "env.shaRef" (dict "deployment" $deploymentName "global" $) -}}
+{{- $account := ($.Values.ciOptions).aws_account_id | default "123456789012" -}}
+{{- $region := ($.Values.ciOptions).cloud_region | default "us-east-1" -}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  {{- include "metadata.standard" (dict "name" $deploymentName "config" $deployment "global" $) | nindent 2 }}
+spec:
+  replicas: {{ include "env.replicas" (dict "global" $ "deployment" $deploymentName) }}
+  selector:
+    matchLabels:
+      {{- include "common.labels" (dict "name" $deploymentName "global" $) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "common.labels" (dict "name" $deploymentName "global" $) | nindent 8 }}
+      {{- $podAnnotations := include "pod.annotations" (dict "name" $deploymentName "deployment" $deployment "global" $) -}}
+      {{- if $podAnnotations }}
+      annotations:
+        {{- $podAnnotations | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- if $deployment.serviceAccountName }}
+      serviceAccountName: {{ $deployment.serviceAccountName }}
+      {{- end }}
+      containers:
+      - name: {{ $deploymentName }}
+        image: {{ $account }}.dkr.ecr.{{ $region }}.amazonaws.com/inscape-infra-{{ $ecrEnv }}-{{ $deploymentName }}:{{ $deploymentName }}-{{ $ecrEnv }}-{{ $shaRef }}
+        imagePullPolicy: IfNotPresent
+        {{- if $deployment.port }}
+        ports:
+        - containerPort: {{ $deployment.port }}
+          name: {{ $deployment.portName | default "http" }}
+        {{- end }}
+        env:
+        {{- include "container.env" (dict "config" $deployment "name" $deploymentName "global" $) | nindent 8 }}
+        {{- if $deployment.resources }}
+        resources:
+          {{- toYaml $deployment.resources | nindent 10 }}
+        {{- end }}
+        {{- if $deployment.probes }}
+        {{- if $deployment.probes.liveness }}
+        livenessProbe:
+          {{- toYaml $deployment.probes.liveness | nindent 10 }}
+        {{- end }}
+        {{- if $deployment.probes.readiness }}
+        readinessProbe:
+          {{- toYaml $deployment.probes.readiness | nindent 10 }}
+        {{- end }}
+        {{- end }}
+{{- end }}
+{{- end }}
+

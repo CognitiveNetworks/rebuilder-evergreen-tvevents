@@ -1,0 +1,20 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: tvevents-k8s
+  description: Containerizing tvevents application
+  annotations:
+    github.com/project-slug: CognitiveNetworks/tvevents-k8s
+    backstage.io/techdocs-ref: dir:.
+    sonarqube.org/project-key: N/A
+    pagerduty.com/account: cognet
+    pagerduty.com/service-id: PSV1WEB
+    pagerduty.com/integration-key: ba69f72df7434704d07f209429bcae19
+  tags:
+    - python
+    - internal
+spec:
+  type: service
+  lifecycle: production
+  owner: cognitivenetworks/inscape-de
+  system: tv-command

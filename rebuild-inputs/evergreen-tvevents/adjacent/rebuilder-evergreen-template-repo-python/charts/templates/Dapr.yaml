@@ -1,0 +1,59 @@
+{{/*
+DAPR COMPONENT TEMPLATE
+
+Generates Dapr Component CRDs for cloud-agnostic service integration.
+
+Configuration: values-mvp.yaml -> daprComponents[appName]
+
+Features:
+- Cloud provider abstraction (AWS/GCP/Azure)
+- S3/Blob Storage bindings
+- Secret references for credentials
+- Sidecar injection via pod annotations
+
+How it works:
+1. Dapr sidecar injected via pod annotations (dapr.io/enabled: "true")
+2. Component defines binding type and metadata
+3. Application calls localhost:3500/v1.0/bindings/{component-name}
+4. Dapr translates to cloud provider API calls
+*/}}
+{{- $cloudProvider := "aws" -}}
+{{- if and .Values.ciOptions (hasKey .Values.ciOptions "cloudProvider") -}}
+  {{- $cloudProvider = .Values.ciOptions.cloudProvider -}}
+{{- else if .Values.global -}}
+  {{- $cloudProvider = .Values.global.cloudProvider | default "aws" -}}
+{{- end -}}
+{{- range $appName, $daprConfig := .Values.daprComponents }}
+  {{- if $daprConfig.enabled }}
+    {{- $cloudConfig := index $daprConfig.cloudProviders $cloudProvider }}
+    {{- if $cloudConfig }}
+      {{- range $component := $cloudConfig.components }}
+        {{- if $component.enabled }}
+---
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: {{ $component.name }}
+  namespace: {{ include "resource.namespace" $ }}
+  labels:
+    {{- include "common.labels" (dict "name" $appName "global" $) | nindent 4 }}
+spec:
+  {{- $componentConfig := index $component $cloudProvider }}
+  type: {{ $componentConfig.type }}
+  version: v1
+  metadata:
+    {{- range $componentConfig.metadata }}
+    - name: {{ .name }}
+      {{- if .secretKeyRef }}
+      secretKeyRef:
+        name: {{ .secretKeyRef.name }}
+        key: {{ .secretKeyRef.key }}
+      {{- else }}
+      value: {{ .value | quote }}
+      {{- end }}
+    {{- end }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+{{- end }}

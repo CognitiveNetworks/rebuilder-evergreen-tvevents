@@ -1,0 +1,378 @@
+suite: test deployment
+templates:
+  - Deployment.yaml
+tests:
+  # DEV Environment Tests
+  - it: dev - should generate correct ECR image path and replica count
+    set:
+      global:
+        appName: demo-app
+        serviceName: demo-app
+        labels:
+          environment: dev
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: dev
+        aws_account_id: "123456789012"
+        cloud_region: us-east-1
+        workload_env: false
+      deployments:
+        demo-app:
+          enabled: true
+          name: demo-app
+          port: 8000
+      environmentConfig:
+        dev:
+          deployments:
+            demo-app:
+              sha_ref: abc123
+              replicas: 4
+    asserts:
+      - isKind:
+          of: Deployment
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: ^123456789012\.dkr\.ecr\.us-east-1\.amazonaws\.com/inscape-infra-dev-demo-app:demo-app-dev-abc123$
+      - equal:
+          path: spec.replicas
+          value: 4
+
+  - it: dev - workload_env should use correct image path
+    set:
+      global:
+        appName: demo-app
+        labels:
+          environment: dev
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: dev
+        aws_account_id: "123456789012"
+        cloud_region: us-east-1
+        workload_env: true
+      deployments:
+        demo-app:
+          enabled: true
+          name: demo-app
+      environmentConfig:
+        dev:
+          deployments:
+            demo-app:
+              sha_ref: def456
+              replicas: 4
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: ^123456789012\.dkr\.ecr\.us-east-1\.amazonaws\.com/inscape-infra-dev-demo-app:demo-app-dev-def456$
+
+  # QA Environment Tests
+  - it: qa - should generate correct ECR image path and replica count
+    set:
+      global:
+        appName: demo-app
+        labels:
+          environment: qa
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: qa
+        aws_account_id: "234567890123"
+        cloud_region: us-east-1
+        workload_env: false
+      deployments:
+        demo-app:
+          enabled: true
+          name: demo-app
+      environmentConfig:
+        qa:
+          deployments:
+            demo-app:
+              sha_ref: qa789
+              replicas: 5
+    asserts:
+      - isKind:
+          of: Deployment
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: ^234567890123\.dkr\.ecr\.us-east-1\.amazonaws\.com/inscape-infra-qa-demo-app:demo-app-qa-qa789$
+      - equal:
+          path: spec.replicas
+          value: 5
+
+  - it: qa - workload_env should use correct image path
+    set:
+      global:
+        appName: demo-app
+        labels:
+          environment: qa
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: qa
+        aws_account_id: "234567890123"
+        cloud_region: us-east-1
+        workload_env: true
+      deployments:
+        demo-app:
+          enabled: true
+          name: demo-app
+      environmentConfig:
+        qa:
+          deployments:
+            demo-app:
+              sha_ref: qa456
+              replicas: 5
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: ^234567890123\.dkr\.ecr\.us-east-1\.amazonaws\.com/inscape-infra-qa-demo-app:demo-app-qa-qa456$
+
+  # STAGING Environment Tests
+  - it: staging - should generate correct ECR image path and replica count
+    set:
+      global:
+        appName: demo-app
+        labels:
+          environment: staging
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: staging
+        aws_account_id: "345678901234"
+        cloud_region: us-west-2
+        workload_env: false
+      deployments:
+        demo-app:
+          enabled: true
+          name: demo-app
+      environmentConfig:
+        staging:
+          deployments:
+            demo-app:
+              sha_ref: stg123
+              replicas: 10
+    asserts:
+      - isKind:
+          of: Deployment
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: ^345678901234\.dkr\.ecr\.us-west-2\.amazonaws\.com/inscape-infra-staging-demo-app:demo-app-staging-stg123$
+      - equal:
+          path: spec.replicas
+          value: 10
+
+  - it: staging - workload_env should use correct image path
+    set:
+      global:
+        appName: demo-app
+        labels:
+          environment: staging
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: staging
+        aws_account_id: "345678901234"
+        cloud_region: us-west-2
+        workload_env: true
+      deployments:
+        demo-app:
+          enabled: true
+          name: demo-app
+      environmentConfig:
+        staging:
+          deployments:
+            demo-app:
+              sha_ref: stg789
+              replicas: 10
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: ^345678901234\.dkr\.ecr\.us-west-2\.amazonaws\.com/inscape-infra-staging-demo-app:demo-app-staging-stg789$
+
+  # PROD Environment Tests
+  - it: prod - should generate correct ECR image path and replica count
+    set:
+      global:
+        appName: demo-app
+        labels:
+          environment: prod
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: prod
+        aws_account_id: "999888777666"
+        cloud_region: us-west-2
+        workload_env: false
+      deployments:
+        demo-app:
+          enabled: true
+          name: demo-app
+      environmentConfig:
+        prod:
+          deployments:
+            demo-app:
+              sha_ref: xyz789
+              replicas: 100
+    asserts:
+      - isKind:
+          of: Deployment
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: ^999888777666\.dkr\.ecr\.us-west-2\.amazonaws\.com/inscape-infra-prod-demo-app:demo-app-prod-xyz789$
+      - equal:
+          path: spec.replicas
+          value: 100
+
+  - it: prod - workload_env should use correct image path
+    set:
+      global:
+        appName: demo-app
+        labels:
+          environment: prod
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: prod
+        aws_account_id: "999888777666"
+        cloud_region: us-west-2
+        workload_env: true
+      deployments:
+        demo-app:
+          enabled: true
+          name: demo-app
+      environmentConfig:
+        prod:
+          deployments:
+            demo-app:
+              sha_ref: prod456
+              replicas: 100
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: ^999888777666\.dkr\.ecr\.us-west-2\.amazonaws\.com/inscape-infra-prod-demo-app:demo-app-prod-prod456$
+
+  # PR Environment Tests
+  - it: pr_env - should generate correct ECR image path with PR number using dev repo
+    set:
+      global:
+        appName: demo-app
+        labels:
+          environment: pr-123
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: pr-123
+        aws_account_id: "123456789012"
+        cloud_region: us-east-1
+        workload_env: false
+        pr_number: 123
+      deployments:
+        demo-app:
+          enabled: true
+          name: demo-app
+      environmentConfig:
+        pr-123:
+          deployments:
+            demo-app:
+              sha_ref: pr123abc
+              replicas: 1
+    asserts:
+      - isKind:
+          of: Deployment
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: ^123456789012\.dkr\.ecr\.us-east-1\.amazonaws\.com/inscape-infra-dev-demo-app:demo-app-dev-pr123abc$
+      - equal:
+          path: spec.replicas
+          value: 1
+
+  - it: pr_env - should handle different PR numbers using dev repo
+    set:
+      global:
+        appName: demo-app
+        labels:
+          environment: pr-456
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: pr-456
+        aws_account_id: "123456789012"
+        cloud_region: us-east-1
+        workload_env: false
+        pr_number: 456
+      deployments:
+        demo-app:
+          enabled: true
+          name: demo-app
+      environmentConfig:
+        pr-456:
+          deployments:
+            demo-app:
+              sha_ref: pr456xyz
+              replicas: 2
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: ^123456789012\.dkr\.ecr\.us-east-1\.amazonaws\.com/inscape-infra-dev-demo-app:demo-app-dev-pr456xyz$
+      - equal:
+          path: spec.replicas
+          value: 2
+
+  # Disabled Deployment Test
+  - it: should not create deployment when disabled
+    set:
+      global:
+        appName: demo-app
+      ciOptions:
+        environment: dev
+        workload_env: false
+      deployments:
+        demo-app:
+          enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # ServiceAccount Integration Test
+  - it: should use serviceAccountName when specified
+    set:
+      global:
+        appName: demo-app
+        labels:
+          environment: dev
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: dev
+        aws_account_id: "123456789012"
+        cloud_region: us-east-1
+        workload_env: false
+      deployments:
+        demo-app:
+          enabled: true
+          name: demo-app
+          serviceAccountName: demo-app-sa
+      environmentConfig:
+        dev:
+          deployments:
+            demo-app:
+              sha_ref: abc123
+              replicas: 4
+    asserts:
+      - isKind:
+          of: Deployment
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: demo-app-sa

@@ -1,0 +1,213 @@
+# =================================================================
+# MVP CONFIGURATION - evergreen-tvevents
+# Bare minimum config to deploy evergreen-tvevents
+#
+# REQUIRED TEMPLATES & HELPERS:
+# - charts/templates/Deployment.yaml (uses deployments map)
+# - charts/templates/Service.yaml (uses services map)
+# - charts/templates/HTTPRoute.yaml (uses httproutes map)
+# - charts/templates/_helpers.tpl:
+#   * common.labels - generates standard k8s labels
+#   * resource.suffix - creates unique resource names
+#   * env.type/env.isDev - determines environment type
+#   * image.tag - resolves container image tags
+# - charts/templates/_httproute.tpl:
+#   * resource.hostname - generates hostnames for HTTPRoutes
+# - charts/templates/_env.tpl:
+#   * env.merge - merges environment variables from multiple sources
+# - charts/templates/_metadata.tpl:
+#   * metadata.labels - generates metadata labels for resources
+#   * metadata.annotations - generates metadata annotations
+# =================================================================
+
+# Global configuration
+global:
+  appName: "evergreen-tvevents"
+  serviceName: "evergreen-tvevents"
+  hostPrefix: "evergreen-tvevents"
+  domain: "evergreen.cognet.tv"
+  serviceDomain: "inscape-infra"
+  cloudProvider: "aws"
+
+  # Standard labels
+  labels:
+    environment: "dev"
+    team: "inscape-tvevents"
+    function: "tvevents"
+    service: "evergreen-tvevents"
+    cost-unit: "inscape-evergreen"
+    version: "1.0.0"
+
+  # Standard annotations
+  annotations:
+    repo: "CognitiveNetworks/evergreen-tvevents"
+    created-by: "helm"
+
+
+# =================================================================
+# DEPLOYMENT - Single deployment only
+# =================================================================
+deployments:
+  evergreen-tvevents:
+    enabled: true
+    name: "evergreen-tvevents"
+    port: 8000
+    portName: "http"
+    resources:
+      requests:
+        cpu: "3500m"
+        memory: "512Mi"
+        ephemeral-storage: "1Gi"
+      limits:
+        cpu: "4000m"
+        memory: "1Gi"
+        ephemeral-storage: "2Gi"
+    probes:
+      liveness:
+        httpGet:
+          path: /status
+          port: 8000
+        initialDelaySeconds: 90
+        periodSeconds: 90
+        timeoutSeconds: 10
+        failureThreshold: 3
+      readiness:
+        httpGet:
+          path: /status
+          port: 8000
+        initialDelaySeconds: 37
+        periodSeconds: 17
+        timeoutSeconds: 5
+        failureThreshold: 5
+    podDisruption:
+      enabled: true
+      maxUnavailable: 1
+    env:
+      # Always required
+      ENV: "dev"
+      LOG_LEVEL: "DEBUG"
+      AWS_REGION: "us-east-1"
+      TEST_CONTAINER: "false"
+      SERVICE_NAME: "evergreen-tvevents"
+      OTEL_SDK_DISABLED: "true"
+      OTEL_PYTHON_AUTO_INSTRUMENTATION_ENABLED: "false"
+      # Application-specific
+      BLACKLIST_CHANNEL_IDS_CACHE_FILEPATH: "/tmp/.blacklisted_channel_ids_cache"
+      TVEVENTS_DEBUG: "true"
+      SEND_EVERGREEN: "true"
+      SEND_LEGACY: "true"
+      KAFKA_TOPIC_EVERGREEN: "tveoe-evergreen"
+      KAFKA_TOPIC_EVERGREEN_DEBUG: "tveoe-debug-evergreen"
+      KAFKA_TOPIC_LEGACY: "tveoe-legacy"
+      KAFKA_TOPIC_LEGACY_DEBUG: "tveoe-debug-legacy"
+
+# =================================================================
+# SERVICE - Single service only
+# =================================================================
+services:
+  evergreen-tvevents:
+    enabled: true
+    type: ClusterIP
+    port: 80
+    targetPort: 8000
+
+# =================================================================
+# ENVIRONMENT CONFIG - Per-environment deployment configuration
+# =================================================================
+environmentConfig:
+  dev:
+    logLevel: "DEBUG"
+    otel:
+      replicas: 1
+    deployments:
+      evergreen-tvevents:
+        sha_ref: "latest"
+        replicas: 4
+  qa:
+    logLevel: "DEBUG"
+    otel:
+      replicas: 1
+    deployments:
+      evergreen-tvevents:
+        sha_ref: "latest"
+        replicas: 5
+        scaledObject:
+          enabled: true
+          minReplicaCount: 1
+          maxReplicaCount: 200
+          triggers:
+            - type: cpu
+              metricType: Utilization
+              metadata:
+                value: "70"
+  prod:
+    logLevel: "WARN"
+    otel:
+      replicas: 3
+    deployments:
+      evergreen-tvevents:
+        sha_ref: "latest"
+        replicas: 300
+        scaledObject:
+          enabled: true
+          minReplicaCount: 300
+          maxReplicaCount: 500
+          triggers:
+            - type: cpu
+              metricType: Utilization
+              metadata:
+                value: "70"
+
+
+# =================================================================
+# HTTPROUTE - Ingress routing
+# =================================================================
+httproutes:
+  "evergreen.cognet.tv":
+    enabled: true
+    targetDeployment: "evergreen-tvevents"
+    parentRefs:
+      - name: evergreen.cognet.tv
+        namespace: evergreen-gateway
+    rules:
+      - backendRefs:
+          - name: evergreen-tvevents
+            port: 80
+        matches:
+          - path:
+              type: PathPrefix
+              value: /
+
+# =================================================================
+# SECRETS CONFIGURATION
+# External Secret Stores and Secrets
+# =================================================================
+
+# External Secret Stores
+secretstores:
+  evergreen-tvevents:
+    enabled: true
+    provider: aws
+    region: us-east-1
+    annotations:
+      argocd.argoproj.io/sync-wave: "-2"
+
+# External Secrets
+secrets:
+  evergreen-tvevents:
+    enabled: true
+    secretStore: evergreen-tvevents
+    annotations:
+      argocd.argoproj.io/sync-wave: "-1"
+      argocd.argoproj.io/sync-options: "SkipDryRunOnMissingResource=true"
+    name: "evergreen-tvevents-secrets"
+    path: "/tvevents/tvcdb"
+    syncAll: true
+  otelcollector:
+    enabled: true
+    secretStore: evergreen-tvevents
+    name: "otel-collector-secrets"
+    path: "/inscape/o11y-config"
+    annotations:
+      argocd.argoproj.io/sync-wave: "-1"
+      argocd.argoproj.io/sync-options: "SkipDryRunOnMissingResource=true"

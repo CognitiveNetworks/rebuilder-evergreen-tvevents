@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Test / coverage
+.coverage
+coverage_report/
+coverage.xml
+htmlcov/
+.pytest_cache/
+
+# Build-time dependencies (cloned / generated locally)
+cntools_py3/
+requirements.txt
+
+# Environment (secrets)
+.env
+
+# OS
+.DS_Store

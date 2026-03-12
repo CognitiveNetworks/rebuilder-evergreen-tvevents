@@ -1,0 +1,6 @@
+name: demo-app
+version: 0.0.1
+appVersion: "0.0.1"
+description: Helm chart for deploying a demo application
+apiVersion: v2
+icon: https://www.vizio.com/etc.clientlibs/vizio/clientlibs/2020/favicon/resources/favicon.ico

@@ -1,0 +1,31 @@
+{{/*
+SERVICE TEMPLATE
+
+Generates Kubernetes Service resources for pod networking.
+
+Configuration: values-mvp.yaml -> services[name]
+
+Features:
+- ClusterIP service type for internal routing
+- Selector matches deployment pods via app label
+- Port mapping from service port to container targetPort
+*/}}
+{{- range $serviceName, $service := .Values.services }}
+{{- if $service.enabled }}
+{{- $suffix := include "resource.suffix" $ -}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  {{- include "metadata.standard" (dict "name" $serviceName "config" $service "global" $) | nindent 2 }}
+spec:
+  type: {{ $service.type }}
+  ports:
+  - port: {{ $service.port }}
+    targetPort: {{ $service.targetPort | default $service.port }}
+    protocol: TCP
+    name: http
+  selector:
+    app: {{ $serviceName }}-{{ $suffix }}
+  {{- end }}
+{{- end }}

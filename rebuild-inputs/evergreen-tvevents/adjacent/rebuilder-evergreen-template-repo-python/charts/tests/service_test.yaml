@@ -1,0 +1,170 @@
+suite: test service
+templates:
+  - Service.yaml
+tests:
+  # DEV Environment - Local
+  - it: dev local - should create service with correct ports
+    set:
+      global:
+        appName: demo-app
+        serviceName: demo-app
+        labels:
+          environment: dev
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: dev
+        workload_env: false
+      services:
+        demo-app:
+          enabled: true
+          type: ClusterIP
+          port: 80
+          targetPort: 8000
+    asserts:
+      - isKind:
+          of: Service
+      - equal:
+          path: spec.type
+          value: ClusterIP
+      - equal:
+          path: spec.ports[0].port
+          value: 80
+      - equal:
+          path: spec.ports[0].targetPort
+          value: 8000
+
+  # DEV Environment - Workload
+  - it: dev workload - should create service for dev workload environment
+    set:
+      global:
+        appName: demo-app
+        labels:
+          environment: dev
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: dev
+        workload_env: true
+      services:
+        demo-app:
+          enabled: true
+          type: ClusterIP
+          port: 80
+          targetPort: 8000
+    asserts:
+      - isKind:
+          of: Service
+
+  # QA Environment
+  - it: qa - should create service for qa environment
+    set:
+      global:
+        appName: demo-app
+        labels:
+          environment: qa
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: qa
+        workload_env: true
+      services:
+        demo-app:
+          enabled: true
+          type: ClusterIP
+          port: 80
+          targetPort: 8000
+    asserts:
+      - isKind:
+          of: Service
+      - equal:
+          path: spec.type
+          value: ClusterIP
+
+  # STAGING Environment
+  - it: staging - should create service for staging environment
+    set:
+      global:
+        appName: demo-app
+        labels:
+          environment: staging
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: staging
+        workload_env: true
+      services:
+        demo-app:
+          enabled: true
+          type: ClusterIP
+          port: 80
+          targetPort: 8000
+    asserts:
+      - isKind:
+          of: Service
+
+  # PROD Environment
+  - it: prod - should create service for prod environment
+    set:
+      global:
+        appName: demo-app
+        labels:
+          environment: prod
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: prod
+        workload_env: true
+      services:
+        demo-app:
+          enabled: true
+          type: ClusterIP
+          port: 80
+          targetPort: 8000
+    asserts:
+      - isKind:
+          of: Service
+
+  # PR Environment
+  - it: pr_env - should create service for PR environment
+    set:
+      global:
+        appName: demo-app
+        labels:
+          environment: pr-123
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: pr-123
+        pr_number: 123
+        workload_env: false
+      services:
+        demo-app:
+          enabled: true
+          type: ClusterIP
+          port: 80
+          targetPort: 8000
+    asserts:
+      - isKind:
+          of: Service
+
+  # Edge Cases
+  - it: should not create service when disabled
+    set:
+      global:
+        appName: demo-app
+      ciOptions:
+        environment: dev
+        workload_env: false
+      services:
+        demo-app:
+          enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0

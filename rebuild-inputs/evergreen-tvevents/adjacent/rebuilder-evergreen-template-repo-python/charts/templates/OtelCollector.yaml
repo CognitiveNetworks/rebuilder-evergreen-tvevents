@@ -1,0 +1,96 @@
+{{/*
+OTEL COLLECTOR TEMPLATE
+
+Generates OpenTelemetry Collector deployment for telemetry aggregation.
+
+Configuration: values-mvp.yaml -> otelcollector
+
+Features:
+- OTLP receiver (gRPC and HTTP)
+- Batch processing
+- Log filtering (Dapr noise reduction)
+- External endpoint export (New Relic, etc.)
+- Secret-based configuration
+*/}}
+{{- if and .Values.otelcollector .Values.otelcollector.enabled }}
+{{- $env := include "env.name" . -}}
+{{- $envConfig := index .Values.environmentConfig $env | default dict -}}
+---
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  {{- include "metadata.standard" (dict "name" "otel-collector" "config" .Values.otelcollector "global" .) | nindent 2 }}
+spec:
+  mode: deployment
+  replicas: {{ $envConfig.otel.replicas }}
+  image: otel/opentelemetry-collector-contrib:latest
+  env:
+  - name: OTEL_EXTERNAL_ENDPOINT
+    valueFrom:
+      secretKeyRef:
+        name: otel-collector-secrets
+        key: OTEL_EXPORTER_OTLP_ENDPOINT
+  - name: OTEL_EXTERNAL_HEADER
+    valueFrom:
+      secretKeyRef:
+        name: otel-collector-secrets
+        key: OTEL_EXPORTER_OTLP_HEADERS
+  # Provide a service identity for the collector's own telemetry (if enabled).
+  # Uses resource.serviceName helper which generates: serviceName-environment-region
+  - name: OTEL_SERVICE_NAME
+    value: {{ include "resource.serviceName" (dict "global" .) | quote }}
+  resources:
+    requests:
+      cpu: 500m
+      memory: 128Mi
+    limits:
+      cpu: 1000m
+      memory: 1000Mi
+  config:
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: '[::]:4317'
+          http:
+            endpoint: '[::]:4318'
+    processors:
+      batch: {}
+      filter/noisy:
+        logs:
+          # Collector image/build here does not support 'expressions' for log filtering; fallback to regexp body matching.
+          exclude:
+            match_type: regexp
+            bodies:
+              - '.*dapr is not ready.*'
+              - '.*Back-off pulling image.*'
+              - '.*BackOff pulling image.*'
+      filter/dapr-sidecars:
+        logs:
+          # Drop Dapr sidecar logs using body heuristic first (container name often prefixed in body) as expr filtering unsupported.
+          # If k8sattributes processor added later, switch back to attribute expressions.
+          exclude:
+            match_type: regexp
+            bodies:
+              - '.*daprd.*'
+    exporters:
+      otlp:
+        endpoint: ${OTEL_EXTERNAL_ENDPOINT}
+        headers:
+          api-key: ${OTEL_EXTERNAL_HEADER}
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [otlphttp/newrelic]
+        metrics:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [otlphttp/newrelic]
+        logs:
+          receivers: [filelog]
+          processors: [memory_limiter, batch]
+          exporters: [otlphttp/newrelic]
+{{- end }}
+

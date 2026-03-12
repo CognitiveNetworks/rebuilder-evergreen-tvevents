@@ -1,0 +1,148 @@
+name: tvevents-k8s
+namespace: tvevents-k8s
+
+image:
+  imagePullPolicy: IfNotPresent
+
+environmentConfig:
+  dev:
+    sha_ref: bae8a0e6fa7ce26b7f915ed1fe9644faf6301248
+    otel_replicas: 1
+    minReplicaCount: 1
+    maxReplicaCount: 10
+  staging:
+    sha_ref: bae8a0e6fa7ce26b7f915ed1fe9644faf6301248
+    otel_replicas: 1
+    minReplicaCount: 1
+    maxReplicaCount: 10
+  qa:
+    sha_ref: bae8a0e6fa7ce26b7f915ed1fe9644faf6301248
+    otel_replicas: 1
+    minReplicaCount: 1
+    maxReplicaCount: 200
+  prod:
+    sha_ref: bae8a0e6fa7ce26b7f915ed1fe9644faf6301248
+    otel_replicas: 3
+    minReplicaCount: 300
+    maxReplicaCount: 500
+
+cpuScalingThreshold: 70
+
+labels:
+  cost-unit: "inscape-evergreen"
+  function: "tvevents"
+  service: "tvevents"
+  team: "inscape-tvevents"
+
+annotations:
+  created-by: "inscape"
+  repo: "CognitiveNetworks/tvevents-k8s"
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8000
+
+keyDomain: tvevents/tvcdb
+o11yKeyDomain: inscape/o11y-config
+localSecrets: local-secret-config
+
+localDev:
+  enabled: false
+  aws_region: none
+  env: dev-local
+  local_repository: tvevents-k8s
+  local_tag: v1.1.0
+  AWS_ACCESS_KEY_ID: adfadsfs
+  AWS_SECRET_ACCESS_KEY:
+  AWS_SESSION_TOKEN:
+  AWS_ACCOUNT:
+  T1_SALT: 'adfadf'
+  RDS_HOST: tvcdb-development.cognet.tv
+  RDS_PASS: tvevents
+  RDS_USER: tvevents
+  RDS_PORT: 5452
+  RDS_DB: tvevents
+  LOCAL_OTEL_PYTHON_AUTO_INSTRUMENTATION_ENABLED: "false"
+  LOCAL_OTEL_EXPORTER_OTLP_HEADERS: "api-key=nr-api-key"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "https://otlp.nr-data.net:443"
+  OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: "https://otlp.nr-data.net:443/v1/traces"
+  OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: "https://otlp.nr-data.net:443/v1/metrics"
+  OTEL_EXPORTER_OTLP_LOGS_ENDPOINT: "https://otlp.nr-data.net:443/v1/logs"
+
+otel:
+  OTEL_PYTHON_LOG_FORMAT: "%(asctime)s %(levelname)s [trace_id=%(otelTraceID)s span_id=%(otelSpanID)s] - %(message)s"
+  OTEL_EXPORTER_OTLP_PROTOCOL: "http/protobuf"
+  OTEL_PYTHON_LOG_CORRELATION: "true"
+  OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_REQUEST: "Accept.*,X-.*"
+  OTEL_EXPORTER_OTLP_COMPRESSION: "gzip"
+  OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT: "4095"
+  OTEL_PYTHON_AUTO_INSTRUMENTATION_ENABLED: "true"
+
+env:
+  BLACKLIST_CHANNEL_IDS_CACHE_FILEPATH: "/tmp/.blacklisted_channel_ids_cache"
+  FLASK_ENV: "tvevents-k8s"
+  WEB_CONCURRENCY: "4"
+  SERVICE_NAME: "tvevents-k8s"
+  LOG_LEVEL: "DEBUG"
+  TVEVENTS_DEBUG: "true"
+  TEST_CONTAINER: "false"
+  SEND_EVERGREEN: "true"
+  SEND_LEGACY: "true"
+  EVERGREEN_FIREHOSE_NAME: "tveoe-evergreen"
+  DEBUG_EVERGREEN_FIREHOSE_NAME: "tveoe-debug-evergreen"
+  LEGACY_FIREHOSE_NAME: "tveoe-legacy"
+  DEBUG_LEGACY_FIREHOSE_NAME: "tveoe-debug-legacy"
+
+resources:
+  requests:
+    memory: "512Mi"
+    cpu: "3500m"
+
+livenessProbe:
+  httpGet:
+    path: /status
+    port: 8000
+  initialDelaySeconds: 90
+  periodSeconds: 90
+  timeoutSeconds: 10
+  failureThreshold: 3
+  successThreshold: 1
+
+terminationGracePeriodSeconds: 60
+
+readinessProbe:
+  httpGet:
+    path: /status
+    port: 8000
+  initialDelaySeconds: 37
+  periodSeconds: 17
+  timeoutSeconds: 5
+  failureThreshold: 5
+  successThreshold: 1
+
+deployment:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 25%
+
+scaling:
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 15
+      - type: Pods
+        value: 8
+        periodSeconds: 15
+      selectPolicy: Max
+    scaleDown:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 25
+        periodSeconds: 30

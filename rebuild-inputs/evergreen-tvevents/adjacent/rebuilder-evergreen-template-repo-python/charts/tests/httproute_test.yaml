@@ -1,0 +1,209 @@
+suite: test httproute
+templates:
+  - HTTPRoute.yaml
+tests:
+  # DEV Environment - Local
+  - it: dev local - should create HTTPRoute when enabled
+    set:
+      global:
+        appName: demo-app
+        hostPrefix: demo-app
+        domain: evergreen.cognet.tv
+        labels:
+          environment: dev
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: dev
+        workload_env: false
+      httproutes:
+        evergreen.cognet.tv:
+          enabled: true
+          targetDeployment: demo-app
+          parentRefs:
+            - name: evergreen.cognet.tv
+              namespace: evergreen-gateway
+          rules:
+            - backendRefs:
+                - name: demo-app
+                  port: 80
+              matches:
+                - path:
+                    type: PathPrefix
+                    value: /
+    asserts:
+      - isKind:
+          of: HTTPRoute
+      - equal:
+          path: spec.parentRefs[0].name
+          value: evergreen.cognet.tv
+      - equal:
+          path: spec.parentRefs[0].namespace
+          value: evergreen-gateway
+
+  # DEV Environment - Workload
+  - it: dev workload - should create HTTPRoute for dev workload environment
+    set:
+      global:
+        appName: demo-app
+        hostPrefix: demo-app
+        domain: evergreen.cognet.tv
+        labels:
+          environment: dev
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: dev
+        workload_env: true
+      httproutes:
+        evergreen.cognet.tv:
+          enabled: true
+          targetDeployment: demo-app
+          parentRefs:
+            - name: evergreen.cognet.tv
+              namespace: evergreen-gateway
+          rules:
+            - backendRefs:
+                - name: demo-app
+                  port: 80
+    asserts:
+      - isKind:
+          of: HTTPRoute
+
+  # QA Environment
+  - it: qa - should create HTTPRoute for qa environment
+    set:
+      global:
+        appName: demo-app
+        hostPrefix: demo-app
+        domain: evergreen.cognet.tv
+        labels:
+          environment: qa
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: qa
+        workload_env: true
+      httproutes:
+        evergreen.cognet.tv:
+          enabled: true
+          targetDeployment: demo-app
+          parentRefs:
+            - name: evergreen.cognet.tv
+              namespace: evergreen-gateway
+          rules:
+            - backendRefs:
+                - name: demo-app
+                  port: 80
+    asserts:
+      - isKind:
+          of: HTTPRoute
+
+  # STAGING Environment
+  - it: staging - should create HTTPRoute for staging environment
+    set:
+      global:
+        appName: demo-app
+        hostPrefix: demo-app
+        domain: evergreen.cognet.tv
+        labels:
+          environment: staging
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: staging
+        workload_env: true
+      httproutes:
+        evergreen.cognet.tv:
+          enabled: true
+          targetDeployment: demo-app
+          parentRefs:
+            - name: evergreen.cognet.tv
+              namespace: evergreen-gateway
+          rules:
+            - backendRefs:
+                - name: demo-app
+                  port: 80
+    asserts:
+      - isKind:
+          of: HTTPRoute
+
+  # PROD Environment
+  - it: prod - should create HTTPRoute for prod environment
+    set:
+      global:
+        appName: demo-app
+        hostPrefix: demo-app
+        domain: evergreen.cognet.tv
+        labels:
+          environment: prod
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: prod
+        workload_env: true
+      httproutes:
+        evergreen.cognet.tv:
+          enabled: true
+          targetDeployment: demo-app
+          parentRefs:
+            - name: evergreen.cognet.tv
+              namespace: evergreen-gateway
+          rules:
+            - backendRefs:
+                - name: demo-app
+                  port: 80
+    asserts:
+      - isKind:
+          of: HTTPRoute
+
+  # PR Environment
+  - it: pr_env - should create HTTPRoute for PR environment
+    set:
+      global:
+        appName: demo-app
+        hostPrefix: demo-app
+        domain: evergreen.cognet.tv
+        labels:
+          environment: pr-123
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: pr-123
+        pr_number: 123
+        workload_env: false
+      httproutes:
+        evergreen.cognet.tv:
+          enabled: true
+          targetDeployment: demo-app
+          parentRefs:
+            - name: evergreen.cognet.tv
+              namespace: evergreen-gateway
+          rules:
+            - backendRefs:
+                - name: demo-app
+                  port: 80
+    asserts:
+      - isKind:
+          of: HTTPRoute
+
+  # Edge Cases
+  - it: should not create HTTPRoute when disabled
+    set:
+      global:
+        appName: demo-app
+      ciOptions:
+        environment: dev
+        workload_env: false
+      httproutes:
+        evergreen.cognet.tv:
+          enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
