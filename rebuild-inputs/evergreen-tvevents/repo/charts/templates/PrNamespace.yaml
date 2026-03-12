@@ -1,0 +1,6 @@
+{{- if not .Values.workload_env}}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: "tvevents-pr-{{default 0 .Values.pr_number}}"
+{{- end }}

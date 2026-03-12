@@ -1,0 +1,133 @@
+#!/bin/bash
+set -eu pipefail
+
+# Define color codes
+RED="\033[31m"
+GREEN="\033[32m"
+WHITE="\033[97m"
+RESET="\033[0m"
+
+# Informational message function (white)
+info() {
+  printf "\n${WHITE}%s${RESET}\n" "$1"
+}
+
+# Success message function (green)
+success() {
+  printf "\n${GREEN}%s${RESET}\n" "$1"
+}
+
+# Failure message function (red)
+fail() {
+  printf "\n${RED}%s${RESET}\n" "$1"
+}
+
+separator() {
+  printf "\n----------------------------------------\n"
+}
+
+# Run black to format the code
+info "Running black..."
+black --check app tests --skip-string-normalization
+if [ $? -ne 0 ]; then
+    fail "black failed, aborting commit."
+    exit 1
+else
+  success "Code is formatted correctly."
+fi
+
+separator
+
+# Run pytest to execute tests
+info "Running pytest..."
+PYTHONPATH=./app pytest
+if [ $? -ne 0 ]; then
+    fail "pytest failed, aborting commit."
+    exit 1
+else
+  success "Tests passed, and code coverage level sufficient."
+fi
+
+separator
+
+# Run pylint to lint the code
+info "Running pylint..."
+pylint app tests
+if [ $? -ne 0 ]; then
+    fail "pylint failed, aborting commit."
+    exit 1
+else
+  success "Linter found no errors."
+fi
+
+separator
+
+# Run complexipy to check code complexity
+info "Running complexipy for app..."
+complexipy app -mx 20 -d low
+if [ $? -ne 0 ]; then
+    fail "complexipy failed, aborting commit."
+    exit 1
+else
+  success "Code passes complexity checks."
+fi
+
+separator
+
+info "Running complexipy for tests..."
+complexipy tests -mx 20 -d low
+if [ $? -ne 0 ]; then
+    fail "complexipy failed, aborting commit."
+    exit 1
+else
+  success "Tests passes complexity checks."
+fi
+
+separator
+
+info "Running mypy for app..."
+mypy app
+if [ $? -ne 0 ]; then
+    fail "mypy failed, aborting commit."
+    exit 1
+else
+  success "Code passes static analysis checks."
+fi
+
+separator
+
+info "Running mypy for tests..."
+mypy tests
+if [ $? -ne 0 ]; then
+    fail "mypy failed, aborting commit."
+    exit 1
+else
+  success "Tests passes static analysis checks."
+fi
+
+separator
+
+# Run Helm checks
+info "Running Helm Lint Checks"
+if ! helm lint ./charts; then
+    fail "Helm lint failed, aborting commit."
+    exit 1
+else
+  success "Helm Lint has passed."
+fi
+
+separator
+
+# Run Helm checks
+info "Running Helm Template Checks"
+if ! helm template charts &> /dev/null; then
+    fail "Helm template checks failed, aborting commit."
+    exit 1
+else
+  success "Helm template checks has passed."
+fi
+
+separator
+
+success "All checks passed, proceeding with commit."
+exit 0

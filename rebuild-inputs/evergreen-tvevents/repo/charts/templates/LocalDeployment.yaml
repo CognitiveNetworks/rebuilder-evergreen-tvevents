@@ -1,0 +1,154 @@
+{{- if .Values.localDev.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.name }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    {{- include "tvevents.annotations" . | nindent 4 }}
+  labels:
+    {{- include "tvevents.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.minReplicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        {{- include "tvevents.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: firehose-writer
+      containers:
+        - name: {{ .Values.name }}
+          image: {{ .Values.localDev.local_repository }}:{{ .Values.localDev.local_tag }}
+          ports:
+            - containerPort: {{ .Values.service.targetPort }}
+          env:
+            - name: AWS_REGION
+              value: {{ .Values.localDev.aws_region }}
+            - name: BLACKLIST_CHANNEL_IDS_CACHE_FILEPATH
+              value: "{{ .Values.env.BLACKLIST_CHANNEL_IDS_CACHE_FILEPATH }}"
+            - name: FLASK_ENV
+              value: "{{ .Values.env.FLASK_ENV }}-local"
+            - name: WEB_CONCURRENCY
+              value: "{{ .Values.env.WEB_CONCURRENCY }}"
+            - name: EVERGREEN_FIREHOSE_NAME
+              value: "{{ .Values.env.EVERGREEN_FIREHOSE_NAME }}"
+            - name: DEBUG_EVERGREEN_FIREHOSE_NAME
+              value: "{{ .Values.env.DEBUG_EVERGREEN_FIREHOSE_NAME }}"
+            - name: LEGACY_FIREHOSE_NAME
+              value: "{{ .Values.env.LEGACY_FIREHOSE_NAME }}"
+            - name: DEBUG_LEGACY_FIREHOSE_NAME
+              value: "{{ .Values.env.DEBUG_LEGACY_FIREHOSE_NAME }}"
+            - name: TVEVENTS_DEBUG
+              value: "{{ .Values.env.TVEVENTS_DEBUG }}"
+            - name: SEND_EVERGREEN
+              value: "{{ .Values.env.SEND_EVERGREEN }}"
+            - name: SEND_LEGACY
+              value: "{{ .Values.env.SEND_LEGACY }}"
+            - name: LOG_LEVEL
+              value: "{{ .Values.env.LOG_LEVEL }}"
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: "{{ .Values.otel.OTEL_EXPORTER_OTLP_PROTOCOL }}"
+            - name: OTEL_PYTHON_LOG_CORRELATION
+              value: "{{ .Values.otel.OTEL_PYTHON_LOG_CORRELATION }}"
+            - name: OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_REQUEST
+              value: "{{ .Values.otel.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_REQUEST }}"
+            - name: OTEL_PYTHON_LOG_FORMAT
+              value: "{{ .Values.otel.OTEL_PYTHON_LOG_FORMAT }}"
+            - name: OTEL_EXPORTER_OTLP_COMPRESSION
+              value: "{{ .Values.otel.OTEL_EXPORTER_OTLP_COMPRESSION }}"
+            - name: OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT
+              value: "{{ .Values.otel.OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT }}"
+            - name: OTEL_PYTHON_AUTO_INSTRUMENTATION_ENABLED
+              value: "{{ .Values.localDev.LOCAL_OTEL_PYTHON_AUTO_INSTRUMENTATION_ENABLED }}"
+            - name: ENV
+              value: "{{ .Values.localDev.env }}"
+            - name: TEST_CONTAINER
+              value: "{{ .Values.env.TEST_CONTAINER }}"
+            - name: RDS_HOST # env var in app
+              valueFrom:
+                 secretKeyRef:
+                   name: {{ .Values.localSecrets }}
+                   key: RDS_HOST
+            - name: RDS_DB
+              valueFrom:
+                 secretKeyRef:
+                   name: {{ .Values.localSecrets }}
+                   key: RDS_DB
+            - name: RDS_USER
+              valueFrom:
+                 secretKeyRef:
+                   name: {{ .Values.localSecrets }}
+                   key: RDS_USER
+            - name: RDS_PASS
+              valueFrom:
+                 secretKeyRef:
+                   name: {{ .Values.localSecrets }}
+                   key: RDS_PASS
+            - name: RDS_PORT
+              valueFrom:
+                 secretKeyRef:
+                   name: {{ .Values.localSecrets }}
+                   key: RDS_PORT
+            - name: T1_SALT
+              valueFrom:
+                 secretKeyRef:
+                   name: {{ .Values.localSecrets }}
+                   key: T1_SALT
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                 secretKeyRef:
+                   name: {{ .Values.localSecrets }}
+                   key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                 secretKeyRef:
+                   name: {{ .Values.localSecrets }}
+                   key: AWS_SECRET_ACCESS_KEY
+            - name: AWS_SESSION_TOKEN
+              valueFrom:
+                 secretKeyRef:
+                   name: {{ .Values.localSecrets }}
+                   key: AWS_SESSION_TOKEN
+            - name: AWS_ACCOUNT
+              valueFrom:
+                 secretKeyRef:
+                   name: {{ .Values.localSecrets }}
+                   key: OTEL_EXPORTER_OTLP_HEADERS
+            # OTEL Secrets
+            - name: OTEL_EXPORTER_OTLP_HEADERS
+              valueFrom:
+               secretKeyRef:
+                 name: {{ .Values.localSecrets }}
+                 key: LOCAL_OTEL_EXPORTER_OTLP_HEADERS
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "{{ .Values.localDev.OTEL_EXPORTER_OTLP_ENDPOINT }}"
+            - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+              value: "{{ .Values.localDev.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT }}"
+            - name: OTEL_EXPORTER_OTLP_METRICS_ENDPOINT
+              value: "{{ .Values.localDev.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT }}"
+            - name: OTEL_EXPORTER_OTLP_LOGS_ENDPOINT1
+              value: "{{ .Values.localDev.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT }}"
+            - name: SERVICE_NAME
+              value: "{{ include "tvevents.serviceName" . }}"
+            - name: OTEL_SERVICE_NAME
+              value: "{{ include "tvevents.serviceName" . }}"
+          resources:
+            requests:
+              memory: "{{ .Values.resources.requests.memory }}"
+              cpu: "{{ .Values.resources.requests.cpu }}"
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.livenessProbe.httpGet.path }}
+              port: {{ .Values.livenessProbe.httpGet.port }}
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.readinessProbe.httpGet.path }}
+              port: {{ .Values.readinessProbe.httpGet.port }}
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+{{- end }}

@@ -1,0 +1,13 @@
+# This file configures the paths that will cause container artifacts to build in the GitHub Actions.
+
+# Folders to monitor
+app
+cntools_py3
+
+# Files to monitor
+Dockerfile
+entrypoint.sh
+environment-check.sh
+pyproject.toml
+requirements.txt
+requirements-dev.txt

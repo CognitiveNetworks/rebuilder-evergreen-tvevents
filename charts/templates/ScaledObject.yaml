@@ -1,0 +1,41 @@
+{{/*
+SCALEDOBJECT TEMPLATE
+
+Generates KEDA ScaledObject resources for horizontal pod autoscaling.
+
+Configuration: environmentConfig[env].deployments[name].scaledObject
+
+Features:
+- CPU/memory-based autoscaling
+- Custom metric triggers
+- Min/max replica bounds from environmentConfig
+- Targets Deployment resources
+- Environment-specific scaling configuration
+*/}}
+{{- range $deploymentName, $deployment := .Values.deployments }}
+{{- if $deployment.enabled }}
+{{- $env := include "env.name" $ }}
+{{- $envConfig := index $.Values.environmentConfig $env | default dict }}
+{{- $deployments := $envConfig.deployments | default dict }}
+{{- $deployConfig := index $deployments $deploymentName | default dict }}
+{{- $scaledObjectConfig := $deployConfig.scaledObject | default dict }}
+{{- if $scaledObjectConfig.enabled }}
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  {{- include "metadata.standard" (dict "name" $deploymentName "config" $deployment "global" $) | nindent 2 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ $deploymentName }}-{{ include "resource.suffix" $ }}
+  minReplicaCount: {{ $scaledObjectConfig.minReplicaCount | default 1 }}
+  maxReplicaCount: {{ $scaledObjectConfig.maxReplicaCount | default 10 }}
+  {{- if $scaledObjectConfig.triggers }}
+  triggers:
+  {{- toYaml $scaledObjectConfig.triggers | nindent 2 }}
+  {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

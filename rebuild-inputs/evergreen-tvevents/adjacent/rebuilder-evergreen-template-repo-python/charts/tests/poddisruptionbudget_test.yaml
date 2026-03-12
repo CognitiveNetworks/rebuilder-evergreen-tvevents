@@ -1,0 +1,191 @@
+suite: test pod disruption budget
+templates:
+  - PodDisruptionBudget.yaml
+tests:
+  # DEV Environment - Local
+  - it: dev local - should create PDB with maxUnavailable
+    set:
+      global:
+        appName: demo-app
+        labels:
+          environment: dev
+        annotations:
+          repo: test
+      ciOptions:
+        environment: dev
+        workload_env: false
+      deployments:
+        demo-app:
+          enabled: true
+          name: demo-app
+          podDisruption:
+            enabled: true
+            maxUnavailable: 1
+    asserts:
+      - isKind:
+          of: PodDisruptionBudget
+      - equal:
+          path: spec.maxUnavailable
+          value: 1
+      - isNull:
+          path: spec.minAvailable
+
+  # DEV Environment - Workload
+  - it: dev workload - should create PDB for dev workload environment
+    set:
+      global:
+        appName: demo-app
+        labels:
+          environment: dev
+        annotations:
+          repo: test
+      ciOptions:
+        environment: dev
+        workload_env: true
+      deployments:
+        demo-app:
+          enabled: true
+          name: demo-app
+          podDisruption:
+            enabled: true
+            maxUnavailable: 1
+    asserts:
+      - isKind:
+          of: PodDisruptionBudget
+
+  # QA Environment
+  - it: qa - should create PDB for qa environment
+    set:
+      global:
+        appName: demo-app
+        labels:
+          environment: qa
+        annotations:
+          repo: test
+      ciOptions:
+        environment: qa
+        workload_env: true
+      deployments:
+        demo-app:
+          enabled: true
+          name: demo-app
+          podDisruption:
+            enabled: true
+            maxUnavailable: 1
+    asserts:
+      - isKind:
+          of: PodDisruptionBudget
+
+  # STAGING Environment
+  - it: staging - should create PDB for staging environment
+    set:
+      global:
+        appName: demo-app
+        labels:
+          environment: staging
+        annotations:
+          repo: test
+      ciOptions:
+        environment: staging
+        workload_env: true
+      deployments:
+        demo-app:
+          enabled: true
+          name: demo-app
+          podDisruption:
+            enabled: true
+            maxUnavailable: 2
+    asserts:
+      - isKind:
+          of: PodDisruptionBudget
+
+  # PROD Environment
+  - it: prod - should create PDB with minAvailable
+    set:
+      global:
+        appName: api
+        labels:
+          environment: prod
+        annotations:
+          repo: test
+      ciOptions:
+        environment: prod
+        workload_env: true
+      deployments:
+        demo-app:
+          enabled: false
+        api:
+          enabled: true
+          name: api
+          podDisruption:
+            enabled: true
+            minAvailable: 2
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: PodDisruptionBudget
+      - equal:
+          path: spec.minAvailable
+          value: 2
+      - isNull:
+          path: spec.maxUnavailable
+
+  # PR Environment
+  - it: pr_env - should create PDB for PR environment
+    set:
+      global:
+        appName: demo-app
+        labels:
+          environment: pr-123
+        annotations:
+          repo: test
+      ciOptions:
+        environment: pr-123
+        pr_number: 123
+        workload_env: false
+      deployments:
+        demo-app:
+          enabled: true
+          name: demo-app
+          podDisruption:
+            enabled: true
+            maxUnavailable: 1
+    asserts:
+      - isKind:
+          of: PodDisruptionBudget
+
+  # Edge Cases
+  - it: should not create PDB when disabled
+    set:
+      global:
+        appName: demo-app
+      ciOptions:
+        environment: dev
+        workload_env: false
+      deployments:
+        demo-app:
+          enabled: true
+          name: demo-app
+          podDisruption:
+            enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not create PDB when podDisruption not defined
+    set:
+      global:
+        appName: demo-app
+      ciOptions:
+        environment: dev
+        workload_env: false
+      deployments:
+        demo-app:
+          enabled: true
+          name: demo-app
+          podDisruption:
+            enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0

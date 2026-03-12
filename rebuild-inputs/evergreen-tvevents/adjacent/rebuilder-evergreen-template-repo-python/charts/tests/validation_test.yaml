@@ -1,0 +1,66 @@
+suite: Configuration Placement Validation
+templates:
+  - Deployment.yaml
+tests:
+  # Test that replicas in deployments fails
+  - it: should fail when replicas is in deployments
+    set:
+      deployments.demo-app.replicas: 3
+    asserts:
+      - failedTemplate: {}
+
+  # Test that sha_ref in deployments fails
+  - it: should fail when sha_ref is in deployments
+    set:
+      deployments.demo-app.sha_ref: "abc123"
+    asserts:
+      - failedTemplate: {}
+
+  # Test that scaledObject in deployments fails
+  - it: should fail when scaledObject is in deployments
+    set:
+      deployments.demo-app.scaledObject.enabled: true
+    asserts:
+      - failedTemplate: {}
+
+  # Test that port in environmentConfig fails
+  - it: should fail when port is in environmentConfig
+    set:
+      environmentConfig.dev.deployments.demo-app.port: 9000
+    asserts:
+      - failedTemplate: {}
+
+  # Test that resources in environmentConfig fails
+  - it: should fail when resources is in environmentConfig
+    set:
+      environmentConfig.dev.deployments.demo-app.resources.requests.cpu: "100m"
+    asserts:
+      - failedTemplate: {}
+
+  # Test that probes in environmentConfig fails
+  - it: should fail when probes is in environmentConfig
+    set:
+      environmentConfig.dev.deployments.demo-app.probes.liveness.httpGet.path: "/health"
+    asserts:
+      - failedTemplate: {}
+
+  # Test that portName in environmentConfig fails
+  - it: should fail when portName is in environmentConfig
+    set:
+      environmentConfig.dev.deployments.demo-app.portName: "https"
+    asserts:
+      - failedTemplate: {}
+
+  # Test that serviceAccountName in environmentConfig fails
+  - it: should fail when serviceAccountName is in environmentConfig
+    set:
+      environmentConfig.dev.deployments.demo-app.serviceAccountName: "test-sa"
+    asserts:
+      - failedTemplate: {}
+
+  # Test that podDisruption in environmentConfig fails
+  - it: should fail when podDisruption is in environmentConfig
+    set:
+      environmentConfig.dev.deployments.demo-app.podDisruption.enabled: true
+    asserts:
+      - failedTemplate: {}

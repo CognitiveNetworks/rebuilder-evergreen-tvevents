@@ -1,0 +1,28 @@
+{{/*
+NAMESPACE TEMPLATE
+
+Generates Namespace resources for PR environments only.
+Workload and dev environments: Namespaces pre-exist or managed by Skaffold.
+
+Configuration: Auto-generated based on environment type
+
+Features:
+- PR environments: ArgoCD sync wave ordering, auto-created
+- Workload environments: Pre-existing namespaces
+- Dev environments: Skaffold creates namespace
+*/}}
+{{- $envType := include "env.type" . -}}
+{{- if eq $envType "pr_env" }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ include "resource.namespace" . }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"
+  labels:
+    environment: pr
+    pr-number: "{{ .Values.ciOptions.pr_number }}"
+    managed-by: argo
+{{- end }}
+

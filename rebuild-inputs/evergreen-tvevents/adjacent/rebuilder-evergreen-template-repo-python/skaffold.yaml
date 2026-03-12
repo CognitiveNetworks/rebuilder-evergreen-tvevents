@@ -1,0 +1,46 @@
+apiVersion: skaffold/v4beta13
+kind: Config
+metadata:
+  name: demo-app
+profiles:
+- name: demo-app
+  activation:
+  - env: SKAFFOLD_PROFILE=demo-app
+  build:
+    artifacts:
+      - image: 445567069541.dkr.ecr.us-east-1.amazonaws.com/inscape-infra-dev-demo-app
+        context: .
+        docker:
+          dockerfile: Dockerfile
+        sync:
+          infer: ["app/**/*.py"]
+        hooks:
+          before:
+            - command: ["./scripts/skaffold-build-before-hook.sh"]
+  deploy:
+    helm:
+      flags:
+        upgrade: ["--force-replace", "--server-side=false"]
+      releases:
+        - name: demo-app
+          namespace: demo-app-loop-dev-{{.USER | replace "." "-"}}
+          createNamespace: true
+          chartPath: charts
+          valuesFiles:
+            - charts/values.yaml
+          setValueTemplates:
+            ciOptions.environment: "dev"
+            ciOptions.cloud_region: "us-east-1"
+            ciOptions.aws_account_id: "445567069541"
+            ciOptions.user: "{{.USER | replace \".\" \"-\"}}"
+            ciOptions.workload_env: "false"
+            ciOptions.pr_number: ""
+            deployments.demo-app.env.OTEL_SDK_DISABLED: "True"
+      hooks:
+        before:
+          - host:
+              command: ["./scripts/skaffold-deploy-before-hook.sh"]
+        after:
+          - host:
+              command: ["./scripts/skaffold-deploy-after-hook.sh"]
+

@@ -1,0 +1,12 @@
+{{- if .Values.workload_env }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Release.Name }}-pdb
+spec:
+  maxUnavailable: 25%
+  selector:
+    matchLabels:
+      deployment: {{ .Release.Name }}-deployment
+  unhealthyPodEvictionPolicy: IfHealthyBudget
+{{- end }}

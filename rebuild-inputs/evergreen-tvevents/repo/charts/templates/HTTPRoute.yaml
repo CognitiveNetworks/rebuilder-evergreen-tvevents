@@ -1,0 +1,45 @@
+{{- if not .Values.localDev.enabled }}
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+metadata:
+  name: {{ .Release.Name }}-http-route
+  labels:
+    {{- include "tvevents.labels" . | nindent 4 }}
+  annotations:
+    {{- include "tvevents.annotations" . | nindent 4 }}
+spec:
+  hostnames:
+    {{- if .Values.workload_env }}
+    - {{ .Values.environment }}.evergreen.tvinteractive.tv
+    {{- if eq .Values.environment "dev" }}
+    - tvevents-development-workload.tvinteractive.tv
+    {{- else if eq .Values.environment "prod" }}
+    - tvevents-production.tvinteractive.tv
+    - tvevents.tvinteractive.tv
+    {{- else if eq .Values.environment "qa" }}
+    - tvevents-qa.tvinteractive.tv
+    {{- else if eq .Values.environment "staging" }}
+    - tvevents-staging.tvinteractive.tv
+    {{- end }}
+    {{- else }}
+    - {{ .Release.Name }}.{{ .Values.environment }}.evergreen.tvinteractive.tv
+    {{- end }}
+  rules:
+    - matches:
+      - method: GET
+        path:
+          type: PathPrefix
+          value: /
+      - method: POST
+        path:
+          type: PathPrefix
+          value: /
+      - method: OPTIONS
+        path:
+          type: PathPrefix
+          value: /
+      backendRefs:
+        - name: {{ .Release.Name }}-service
+          kind: Service
+          port: 80
+{{- end }}

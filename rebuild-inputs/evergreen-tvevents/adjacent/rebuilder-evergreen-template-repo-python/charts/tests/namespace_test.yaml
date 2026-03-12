@@ -1,0 +1,113 @@
+suite: test namespace
+templates:
+  - Namespace.yaml
+tests:
+  # DEV Environment - Local
+  - it: dev local - should not create Namespace for local dev
+    set:
+      global:
+        appName: demo-app
+      ciOptions:
+        environment: dev
+        workload_env: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # DEV Environment - Workload
+  - it: dev workload - should not create Namespace for workload environments
+    set:
+      global:
+        appName: demo-app
+      ciOptions:
+        environment: dev
+        workload_env: true
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # QA Environment
+  - it: qa - should not create Namespace for qa environment
+    set:
+      global:
+        appName: demo-app
+      ciOptions:
+        environment: qa
+        workload_env: true
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # STAGING Environment
+  - it: staging - should not create Namespace for staging environment
+    set:
+      global:
+        appName: demo-app
+      ciOptions:
+        environment: staging
+        workload_env: true
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # PROD Environment
+  - it: prod - should not create Namespace for production
+    set:
+      global:
+        appName: demo-app
+      ciOptions:
+        environment: prod
+        workload_env: true
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # PR Environment
+  - it: pr_env - should create Namespace for PR environment
+    set:
+      global:
+        appName: demo-app
+        labels:
+          environment: pr-123
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: pr-123
+        pr_number: 123
+        workload_env: false
+    asserts:
+      - isKind:
+          of: Namespace
+      - equal:
+          path: metadata.annotations["argocd.argoproj.io/sync-wave"]
+          value: "-5"
+      - equal:
+          path: metadata.labels.environment
+          value: pr
+      - equal:
+          path: metadata.labels.pr-number
+          value: "123"
+      - equal:
+          path: metadata.labels.managed-by
+          value: argo
+
+  - it: pr_env - should create Namespace with different PR number
+    set:
+      global:
+        appName: demo-app
+        labels:
+          environment: pr-456
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: pr-456
+        pr_number: 456
+        workload_env: false
+    asserts:
+      - isKind:
+          of: Namespace
+      - equal:
+          path: metadata.labels.pr-number
+          value: "456"

@@ -1,0 +1,286 @@
+suite: test otelcollector
+templates:
+  - OtelCollector.yaml
+tests:
+  # DEV Environment - Local
+  - it: dev local - should create OtelCollector when enabled
+    set:
+      global:
+        appName: demo-app
+        serviceName: demo-app
+        labels:
+          environment: dev
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: dev
+        workload_env: false
+      environmentConfig:
+        dev:
+          otel:
+            replicas: 1
+      otelcollector:
+        enabled: true
+    asserts:
+      - isKind:
+          of: OpenTelemetryCollector
+      - equal:
+          path: spec.mode
+          value: deployment
+      - equal:
+          path: spec.replicas
+          value: 1
+      - equal:
+          path: spec.image
+          value: otel/opentelemetry-collector-contrib:latest
+
+  # DEV Environment - Workload
+  - it: dev workload - should create OtelCollector for dev workload environment
+    set:
+      global:
+        appName: demo-app
+        serviceName: demo-app
+        labels:
+          environment: dev
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: dev
+        workload_env: true
+      environmentConfig:
+        dev:
+          otel:
+            replicas: 1
+      otelcollector:
+        enabled: true
+    asserts:
+      - isKind:
+          of: OpenTelemetryCollector
+
+  # QA Environment
+  - it: qa - should create OtelCollector for qa environment
+    set:
+      global:
+        appName: demo-app
+        serviceName: demo-app
+        labels:
+          environment: qa
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: qa
+        workload_env: true
+      environmentConfig:
+        qa:
+          otel:
+            replicas: 2
+      otelcollector:
+        enabled: true
+    asserts:
+      - isKind:
+          of: OpenTelemetryCollector
+
+  # STAGING Environment
+  - it: staging - should create OtelCollector for staging environment
+    set:
+      global:
+        appName: demo-app
+        serviceName: demo-app
+        labels:
+          environment: staging
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: staging
+        workload_env: true
+      environmentConfig:
+        staging:
+          otel:
+            replicas: 2
+      otelcollector:
+        enabled: true
+    asserts:
+      - isKind:
+          of: OpenTelemetryCollector
+
+  # PROD Environment
+  - it: prod - should create OtelCollector with secret references
+    set:
+      global:
+        appName: demo-app
+        serviceName: demo-app
+        labels:
+          environment: prod
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: prod
+        workload_env: true
+      environmentConfig:
+        prod:
+          otel:
+            replicas: 3
+      otelcollector:
+        enabled: true
+    asserts:
+      - isKind:
+          of: OpenTelemetryCollector
+      - equal:
+          path: spec.env[0].name
+          value: OTEL_EXTERNAL_ENDPOINT
+      - equal:
+          path: spec.env[0].valueFrom.secretKeyRef.name
+          value: otel-collector-secrets
+      - equal:
+          path: spec.env[0].valueFrom.secretKeyRef.key
+          value: OTEL_EXPORTER_OTLP_ENDPOINT
+      - equal:
+          path: spec.env[1].name
+          value: OTEL_EXTERNAL_HEADER
+      - equal:
+          path: spec.env[1].valueFrom.secretKeyRef.name
+          value: otel-collector-secrets
+
+  # PR Environment
+  - it: pr_env - should create OtelCollector for PR environment
+    set:
+      global:
+        appName: demo-app
+        serviceName: demo-app
+        labels:
+          environment: pr-123
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: pr-123
+        pr_number: 123
+        workload_env: false
+      environmentConfig:
+        pr-123:
+          otel:
+            replicas: 1
+      otelcollector:
+        enabled: true
+    asserts:
+      - isKind:
+          of: OpenTelemetryCollector
+
+  # Edge Cases
+  - it: should configure OTLP receivers
+    set:
+      global:
+        appName: demo-app
+        serviceName: demo-app
+        labels:
+          environment: dev
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: dev
+        workload_env: false
+      environmentConfig:
+        dev:
+          otel:
+            replicas: 1
+      otelcollector:
+        enabled: true
+    asserts:
+      - isKind:
+          of: OpenTelemetryCollector
+      - equal:
+          path: spec.config.receivers.otlp.protocols.grpc.endpoint
+          value: "[::]:4317"
+      - equal:
+          path: spec.config.receivers.otlp.protocols.http.endpoint
+          value: "[::]:4318"
+
+  - it: should configure resource limits
+    set:
+      global:
+        appName: demo-app
+        serviceName: demo-app
+        labels:
+          environment: dev
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: dev
+        workload_env: false
+      environmentConfig:
+        dev:
+          otel:
+            replicas: 1
+      otelcollector:
+        enabled: true
+    asserts:
+      - isKind:
+          of: OpenTelemetryCollector
+      - equal:
+          path: spec.resources.requests.cpu
+          value: 500m
+      - equal:
+          path: spec.resources.requests.memory
+          value: 128Mi
+      - equal:
+          path: spec.resources.limits.cpu
+          value: 1000m
+      - equal:
+          path: spec.resources.limits.memory
+          value: 1000Mi
+
+  - it: should configure batch processor
+    set:
+      global:
+        appName: demo-app
+        serviceName: demo-app
+        labels:
+          environment: dev
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: dev
+        workload_env: false
+      environmentConfig:
+        dev:
+          otel:
+            replicas: 1
+      otelcollector:
+        enabled: true
+    asserts:
+      - isKind:
+          of: OpenTelemetryCollector
+      - isNotNull:
+          path: spec.config.processors.batch
+
+  - it: should not create OtelCollector when disabled
+    set:
+      global:
+        appName: demo-app
+      ciOptions:
+        environment: dev
+        workload_env: false
+      otelcollector:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not create OtelCollector when not configured
+    set:
+      global:
+        appName: demo-app
+      ciOptions:
+        environment: dev
+        workload_env: false
+    asserts:
+      - hasDocuments:
+          count: 0

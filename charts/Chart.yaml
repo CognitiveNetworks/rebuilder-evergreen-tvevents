@@ -1,0 +1,6 @@
+name: evergreen-tvevents
+version: 0.0.1
+appVersion: "1.0.0"
+description: Helm chart for deploying the evergreen-tvevents application
+apiVersion: v2
+icon: https://www.vizio.com/etc.clientlibs/vizio/clientlibs/2020/favicon/resources/favicon.ico

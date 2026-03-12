@@ -1,0 +1,39 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./src/app:/var/www/evergreen-tvevents/app
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: tvevents
+      POSTGRES_USER: tvevents
+      POSTGRES_PASSWORD: localdev
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tvevents"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.100.0
+    ports:
+      - "4318:4318"
+      - "4317:4317"
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
+
+volumes:
+  pgdata:

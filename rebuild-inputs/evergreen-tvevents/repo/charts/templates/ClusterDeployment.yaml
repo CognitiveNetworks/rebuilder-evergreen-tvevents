@@ -1,0 +1,181 @@
+{{- if not .Values.localDev.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ if not .Values.workload_env }}tvevents-pr-{{default 0 .Values.pr_number}}{{ else }}{{ .Values.name }}{{ end }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    {{- include "tvevents.annotations" . | nindent 4 }}
+  labels:
+    deployment: {{ .Release.Name }}-deployment
+    {{- include "tvevents.labels" . | nindent 4 }}
+spec:
+  strategy:
+    type: {{ .Values.deployment.strategy.type }}
+    rollingUpdate:
+      maxSurge: {{ .Values.deployment.strategy.rollingUpdate.maxSurge }}
+      maxUnavailable: {{ .Values.deployment.strategy.rollingUpdate.maxUnavailable }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      annotations:
+        {{- include "tvevents.annotations" . | nindent 8 }}
+      labels:
+        deployment: {{ .Release.Name }}-deployment
+        {{- include "tvevents.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: firehose-writer
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds}}
+      topologySpreadConstraints:
+      - maxSkew: 3
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: ScheduleAnyway     # Strict AZ-level spreading
+        labelSelector:
+          matchLabels:
+            app: {{ .Release.Name }}
+      containers:
+        - name: {{ .Values.name }}
+          {{- $env := default "dev" .Values.environment }}
+          {{- if hasKey .Values.environmentConfig $env }}
+          image: {{ .Values.aws_account_id }}.dkr.ecr.{{ .Values.cloud_region }}.amazonaws.com/inscape-infra-{{ $env }}-tvevents:tvevents-{{ $env }}-{{ (index .Values.environmentConfig $env).sha_ref }}
+          {{- else }}
+          image: {{ .Values.aws_account_id }}.dkr.ecr.{{ .Values.cloud_region }}.amazonaws.com/inscape-infra-{{ $env }}-tvevents:tvevents-{{ $env }}-latest
+          {{- end }}
+          ports:
+            - containerPort: {{ .Values.service.targetPort }}
+          env:
+            - name: AWS_REGION
+              value: {{ .Values.cloud_region }}
+            - name: BLACKLIST_CHANNEL_IDS_CACHE_FILEPATH
+              value: "{{ .Values.env.BLACKLIST_CHANNEL_IDS_CACHE_FILEPATH }}"
+            - name: FLASK_ENV
+              value: "{{ .Values.env.FLASK_ENV }}-{{ .Values.environment }}"
+            - name: WEB_CONCURRENCY
+              value: "{{ .Values.env.WEB_CONCURRENCY }}"
+            - name: EVERGREEN_FIREHOSE_NAME
+              value: "{{ .Values.env.EVERGREEN_FIREHOSE_NAME }}"
+            - name: DEBUG_EVERGREEN_FIREHOSE_NAME
+              value: "{{ .Values.env.DEBUG_EVERGREEN_FIREHOSE_NAME }}"
+            - name: LEGACY_FIREHOSE_NAME
+              value: "{{ .Values.env.LEGACY_FIREHOSE_NAME }}"
+            - name: DEBUG_LEGACY_FIREHOSE_NAME
+              value: "{{ .Values.env.DEBUG_LEGACY_FIREHOSE_NAME }}"
+            - name: TVEVENTS_DEBUG
+              value: "{{ include "tvevents.tvEventsDebug" . }}"
+            - name: SEND_EVERGREEN
+              value: "{{ .Values.env.SEND_EVERGREEN }}"
+            - name: SEND_LEGACY
+              value: "{{ .Values.env.SEND_LEGACY }}"
+            - name: LOG_LEVEL
+              value: "{{ include "tvevents.logLevel" . }}"
+            - name: TEST_CONTAINER
+              value: "{{ .Values.env.TEST_CONTAINER }}"
+            - name: SERVICE_NAME
+              value: "{{ include "tvevents.serviceName" . }}"
+            - name: OTEL_SERVICE_NAME
+              value: "{{ include "tvevents.serviceName" . }}"
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: "{{ .Values.otel.OTEL_EXPORTER_OTLP_PROTOCOL }}"
+            - name: OTEL_PYTHON_AUTO_INSTRUMENTATION_ENABLED
+              value: "{{ .Values.otel.OTEL_PYTHON_AUTO_INSTRUMENTATION_ENABLED }}"
+            - name: OTEL_PYTHON_LOG_CORRELATION
+              value: "{{ .Values.otel.OTEL_PYTHON_LOG_CORRELATION }}"
+            - name: OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_REQUEST
+              value: "{{ .Values.otel.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_REQUEST }}"
+            - name: OTEL_PYTHON_LOG_FORMAT
+              value: "{{ .Values.otel.OTEL_PYTHON_LOG_FORMAT }}"
+            - name: OTEL_EXPORTER_OTLP_COMPRESSION
+              value: "{{ .Values.otel.OTEL_EXPORTER_OTLP_COMPRESSION }}"
+            - name: OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT
+              value: "{{ .Values.otel.OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT }}"
+            - name:  ENV
+              value: "{{ .Values.environment }}"
+            - name: RDS_HOST # env var in app
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-application-secrets
+                  key: RDS_HOST # key in secrets manager
+            - name: RDS_DB
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-application-secrets
+                  key: RDS_DB
+            - name: RDS_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-application-secrets
+                  key: RDS_USER
+            - name: RDS_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-application-secrets
+                  key: RDS_PASS
+            - name: RDS_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-application-secrets
+                  key: RDS_PORT
+            - name: ACR_DATA_MSK_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-application-secrets
+                  key: ACR_DATA_MSK_USERNAME
+            - name: ACR_DATA_MSK_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-application-secrets
+                  key: ACR_DATA_MSK_PASSWORD
+            - name: T1_SALT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-application-secrets
+                  key: T1_SALT
+            # O11y Secrets
+            - name: OTEL_EXPORTER_OTLP_HEADERS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-o11y-secrets
+                  key: OTEL_EXPORTER_OTLP_HEADERS
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-o11y-secrets
+                  key: OTEL_EXPORTER_OTLP_ENDPOINT
+            - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-o11y-secrets
+                  key: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+            - name: OTEL_EXPORTER_OTLP_METRICS_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-o11y-secrets
+                  key: OTEL_EXPORTER_OTLP_METRICS_ENDPOINT
+            - name: OTEL_EXPORTER_OTLP_LOGS_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-o11y-secrets
+                  key: OTEL_EXPORTER_OTLP_LOGS_ENDPOINT
+          resources:
+            requests:
+              memory: "{{ .Values.resources.requests.memory }}"
+              cpu: "{{ .Values.resources.requests.cpu }}"
+          livenessProbe:
+            tcpSocket:
+              port: 8000
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+            successThreshold: {{ .Values.livenessProbe.successThreshold }}
+          readinessProbe:
+            tcpSocket:
+              port: 8000
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
+{{- end }}

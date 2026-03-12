@@ -1,0 +1,28 @@
+{{- range $deploymentName, $deployment := .Values.deployments }}
+{{- if and $deployment.enabled $deployment.podDisruption $deployment.podDisruption.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "resource.suffix" $ }}-{{ $deploymentName }}
+  labels:
+    {{- include "common.labels" (dict "name" $deploymentName "global" $) | nindent 4 }}
+    app.kubernetes.io/component: {{ $deploymentName }}
+  {{- with $deployment.podDisruption.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "resource.suffix" $ }}-{{ $deploymentName }}
+  {{- if $deployment.podDisruption.minAvailable }}
+  minAvailable: {{ $deployment.podDisruption.minAvailable }}
+  {{- else if $deployment.podDisruption.maxUnavailable }}
+  maxUnavailable: {{ $deployment.podDisruption.maxUnavailable }}
+  {{- end }}
+  {{- with $deployment.podDisruption.unhealthyPodEvictionPolicy }}
+  unhealthyPodEvictionPolicy: {{ . }}
+  {{- end }}
+{{- end }}
+{{- end }}

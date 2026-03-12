@@ -1,0 +1,90 @@
+{{- if and (.Values.localDev.enabled) (.Values.localDev.LOCAL_OTEL_PYTHON_AUTO_INSTRUMENTATION_ENABLED) }}
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  name: otel-collector
+  namespace: tvevents
+spec:
+  mode: deployment
+  image: otel/opentelemetry-collector-contrib:latest
+  replicas: 1
+  securityContext:
+    runAsUser: 0
+    runAsGroup: 0
+
+  env:
+    - name: O11Y_API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: {{ .Values.localSecrets }}
+          key: LOCAL_OTEL_EXPORTER_OTLP_HEADERS
+
+  volumeMounts:
+    - name: varlogpods
+      mountPath: /var/log/pods
+      readOnly: true
+    - name: varlibdockercontainers
+      mountPath: /var/lib/docker/containers
+      readOnly: true
+
+  volumes:
+  - name: varlogpods
+    hostPath:
+        path: /var/log/pods
+        type: Directory
+  - name: varlibdockercontainers
+    hostPath:
+      path: /var/lib/docker/containers
+      type: Directory
+
+  config:
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+      filelog:
+        include:
+          - /var/log/pods/*/*/*.log
+        exclude:
+          - /var/log/pods/*/otel-collector/*.log
+        start_at: beginning
+        include_file_path: true
+        include_file_name: false
+        operators:
+          - type: container
+            id: container-parser
+
+    processors:
+      memory_limiter:
+        check_interval: 1s
+        limit_percentage: 75
+        spike_limit_percentage: 15
+      batch:
+        send_batch_size: 2500
+        timeout: 10s
+
+    exporters:
+      otlphttp/newrelic:
+        endpoint: ${O11Y_ENDPOINT}
+        headers:
+          api-key: ${O11Y_API_KEY}
+        compression: gzip
+
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [otlphttp/newrelic]
+        metrics:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [otlphttp/newrelic]
+        logs:
+          receivers: [filelog]
+          processors: [memory_limiter, batch]
+          exporters: [otlphttp/newrelic]
+{{- end }}

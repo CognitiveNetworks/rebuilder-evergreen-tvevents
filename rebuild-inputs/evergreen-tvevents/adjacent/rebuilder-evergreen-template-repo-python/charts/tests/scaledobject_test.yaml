@@ -1,0 +1,268 @@
+suite: test scaledobject
+templates:
+  - ScaledObject.yaml
+tests:
+  # DEV Environment - Local
+  - it: dev local - should not create ScaledObject when disabled
+    set:
+      global:
+        appName: demo-app
+        labels:
+          environment: dev
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: dev
+        workload_env: false
+      deployments:
+        demo-app:
+          enabled: true
+          name: demo-app
+      environmentConfig:
+        dev:
+          deployments:
+            demo-app:
+              sha_ref: dev123
+              replicas: 4
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # DEV Environment - Workload
+  - it: dev workload - should not create ScaledObject when not configured
+    set:
+      global:
+        appName: demo-app
+        labels:
+          environment: dev
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: dev
+        workload_env: true
+      deployments:
+        demo-app:
+          enabled: true
+          name: demo-app
+      environmentConfig:
+        dev:
+          deployments:
+            demo-app:
+              sha_ref: dev456
+              replicas: 4
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # QA Environment
+  - it: qa - should create ScaledObject when enabled
+    set:
+      global:
+        appName: demo-app
+        labels:
+          environment: qa
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: qa
+        workload_env: false
+      deployments:
+        demo-app:
+          enabled: true
+          name: demo-app
+      environmentConfig:
+        qa:
+          deployments:
+            demo-app:
+              sha_ref: qa123
+              replicas: 5
+              scaledObject:
+                enabled: true
+                minReplicaCount: 5
+                maxReplicaCount: 10
+                triggers:
+                  - type: cpu
+                    metricType: Utilization
+                    metadata:
+                      value: "80"
+    asserts:
+      - isKind:
+          of: ScaledObject
+      - equal:
+          path: spec.minReplicaCount
+          value: 5
+      - equal:
+          path: spec.maxReplicaCount
+          value: 10
+      - equal:
+          path: spec.triggers[0].type
+          value: cpu
+
+  # STAGING Environment
+  - it: staging - should create ScaledObject with correct min/max replicas
+    set:
+      global:
+        appName: demo-app
+        labels:
+          environment: staging
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: staging
+        workload_env: true
+      deployments:
+        demo-app:
+          enabled: true
+          name: demo-app
+      environmentConfig:
+        staging:
+          deployments:
+            demo-app:
+              sha_ref: stg456
+              replicas: 10
+              scaledObject:
+                enabled: true
+                minReplicaCount: 10
+                maxReplicaCount: 30
+                triggers:
+                  - type: cpu
+                    metricType: Utilization
+                    metadata:
+                      value: "70"
+    asserts:
+      - isKind:
+          of: ScaledObject
+      - equal:
+          path: spec.minReplicaCount
+          value: 10
+      - equal:
+          path: spec.maxReplicaCount
+          value: 30
+      - equal:
+          path: spec.triggers[0].metadata.value
+          value: "70"
+
+  # PROD Environment
+  - it: prod - should create ScaledObject with production scaling
+    set:
+      global:
+        appName: demo-app
+        labels:
+          environment: prod
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: prod
+        workload_env: true
+      deployments:
+        demo-app:
+          enabled: true
+          name: demo-app
+      environmentConfig:
+        prod:
+          deployments:
+            demo-app:
+              sha_ref: prod789
+              replicas: 100
+              scaledObject:
+                enabled: true
+                minReplicaCount: 100
+                maxReplicaCount: 200
+                triggers:
+                  - type: cpu
+                    metricType: Utilization
+                    metadata:
+                      value: "60"
+    asserts:
+      - isKind:
+          of: ScaledObject
+      - equal:
+          path: spec.minReplicaCount
+          value: 100
+      - equal:
+          path: spec.maxReplicaCount
+          value: 200
+
+  # PR Environment
+  - it: pr_env - should not create ScaledObject for PR environment
+    set:
+      global:
+        appName: demo-app
+        labels:
+          environment: pr-123
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: pr-123
+        pr_number: 123
+        workload_env: false
+      deployments:
+        demo-app:
+          enabled: true
+          name: demo-app
+      environmentConfig:
+        pr-123:
+          deployments:
+            demo-app:
+              sha_ref: pr123
+              replicas: 1
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # Edge Cases
+  - it: should not create ScaledObject when not configured
+    set:
+      global:
+        appName: demo-app
+        labels:
+          environment: dev
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: dev
+        workload_env: false
+      deployments:
+        demo-app:
+          enabled: true
+          name: demo-app
+      environmentConfig:
+        dev:
+          deployments:
+            demo-app:
+              sha_ref: dev456
+              replicas: 2
+              scaledObject:
+                enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not create ScaledObject when deployment is disabled
+    set:
+      global:
+        appName: demo-app
+      ciOptions:
+        environment: qa
+        workload_env: false
+      deployments:
+        demo-app:
+          enabled: false
+      environmentConfig:
+        qa:
+          deployments:
+            demo-app:
+              scaledObject:
+                enabled: true
+                minReplicaCount: 5
+                maxReplicaCount: 10
+    asserts:
+      - hasDocuments:
+          count: 0

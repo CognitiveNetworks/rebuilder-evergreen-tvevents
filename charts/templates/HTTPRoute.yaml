@@ -1,0 +1,24 @@
+{{/*
+HTTPROUTE TEMPLATE
+
+Generates Gateway API HTTPRoute resources for ingress routing.
+
+Configuration: values.yaml -> httproutes[baseDomain]
+
+Features:
+- Environment-specific hostname generation
+- Backend service name suffix appending
+- Kong Gateway integration via parentRefs
+*/}}
+{{- range $baseDomain, $route := .Values.httproutes }}
+  {{- if $route.enabled }}
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+metadata:
+  {{- include "metadata.standard" (dict "name" ($baseDomain | replace "." "-") "config" $route "global" $) | nindent 2 }}
+spec:
+  {{- include "httproute.spec" (dict "baseDomain" $baseDomain "route" $route "global" $) | nindent 2 }}
+  {{- end }}
+{{- end }}
+

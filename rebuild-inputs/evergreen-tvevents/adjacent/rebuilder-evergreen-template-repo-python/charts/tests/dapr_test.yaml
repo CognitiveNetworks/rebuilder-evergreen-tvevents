@@ -1,0 +1,380 @@
+suite: test dapr components
+templates:
+  - Dapr.yaml
+tests:
+  # DEV Environment - Local
+  - it: dev local - should create Dapr component when enabled
+    set:
+      global:
+        appName: demo-app
+        cloudProvider: aws
+        labels:
+          environment: dev
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: dev
+        workload_env: false
+      daprComponents:
+        demo-app:
+          enabled: true
+          cloudProviders:
+            aws:
+              components:
+                - name: object-storage
+                  enabled: true
+                  aws:
+                    type: bindings.aws.s3
+                    metadata:
+                      - name: bucket
+                        value: test-bucket
+                      - name: region
+                        value: us-east-1
+    asserts:
+      - isKind:
+          of: Component
+      - equal:
+          path: metadata.name
+          value: object-storage
+      - equal:
+          path: spec.type
+          value: bindings.aws.s3
+      - equal:
+          path: spec.metadata[0].name
+          value: bucket
+      - equal:
+          path: spec.metadata[0].value
+          value: test-bucket
+
+  # DEV Environment - Workload
+  - it: dev workload - should create Dapr component for dev workload environment
+    set:
+      global:
+        appName: demo-app
+        cloudProvider: aws
+        labels:
+          environment: dev
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: dev
+        workload_env: true
+      daprComponents:
+        demo-app:
+          enabled: true
+          cloudProviders:
+            aws:
+              components:
+                - name: object-storage
+                  enabled: true
+                  aws:
+                    type: bindings.aws.s3
+                    metadata:
+                      - name: bucket
+                        value: dev-bucket
+    asserts:
+      - isKind:
+          of: Component
+
+  # QA Environment
+  - it: qa - should create Dapr component for qa environment
+    set:
+      global:
+        appName: demo-app
+        cloudProvider: aws
+        labels:
+          environment: qa
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: qa
+        workload_env: true
+      daprComponents:
+        demo-app:
+          enabled: true
+          cloudProviders:
+            aws:
+              components:
+                - name: object-storage
+                  enabled: true
+                  aws:
+                    type: bindings.aws.s3
+                    metadata:
+                      - name: bucket
+                        value: qa-bucket
+    asserts:
+      - isKind:
+          of: Component
+
+  # STAGING Environment
+  - it: staging - should create Dapr component for staging environment
+    set:
+      global:
+        appName: demo-app
+        cloudProvider: aws
+        labels:
+          environment: staging
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: staging
+        workload_env: true
+      daprComponents:
+        demo-app:
+          enabled: true
+          cloudProviders:
+            aws:
+              components:
+                - name: object-storage
+                  enabled: true
+                  aws:
+                    type: bindings.aws.s3
+                    metadata:
+                      - name: bucket
+                        value: staging-bucket
+    asserts:
+      - isKind:
+          of: Component
+
+  # PROD Environment
+  - it: prod - should create Dapr component with secret references
+    set:
+      global:
+        appName: demo-app
+        cloudProvider: aws
+        labels:
+          environment: prod
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: prod
+        workload_env: true
+      daprComponents:
+        demo-app:
+          enabled: true
+          cloudProviders:
+            aws:
+              components:
+                - name: object-storage
+                  enabled: true
+                  aws:
+                    type: bindings.aws.s3
+                    metadata:
+                      - name: bucket
+                        value: prod-bucket
+                      - name: accessKey
+                        secretKeyRef:
+                          name: demo-app-secrets
+                          key: S3_ACCESS_KEY_ID
+                      - name: secretKey
+                        secretKeyRef:
+                          name: demo-app-secrets
+                          key: S3_SECRET_ACCESS_KEY
+    asserts:
+      - isKind:
+          of: Component
+      - equal:
+          path: spec.metadata[1].name
+          value: accessKey
+      - equal:
+          path: spec.metadata[1].secretKeyRef.name
+          value: demo-app-secrets
+      - equal:
+          path: spec.metadata[1].secretKeyRef.key
+          value: S3_ACCESS_KEY_ID
+
+  # PR Environment
+  - it: pr_env - should create Dapr component for PR environment
+    set:
+      global:
+        appName: demo-app
+        cloudProvider: aws
+        labels:
+          environment: pr-123
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: pr-123
+        pr_number: 123
+        workload_env: false
+      daprComponents:
+        demo-app:
+          enabled: true
+          cloudProviders:
+            aws:
+              components:
+                - name: object-storage
+                  enabled: true
+                  aws:
+                    type: bindings.aws.s3
+                    metadata:
+                      - name: bucket
+                        value: pr-bucket
+    asserts:
+      - isKind:
+          of: Component
+
+  # Edge Cases
+  - it: should create GCP Dapr component when cloudProvider is gcp
+    set:
+      global:
+        appName: demo-app
+        labels:
+          environment: prod
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: prod
+        workload_env: true
+        cloudProvider: gcp
+      daprComponents:
+        demo-app:
+          enabled: true
+          cloudProviders:
+            gcp:
+              components:
+                - name: gcp-storage
+                  enabled: true
+                  gcp:
+                    type: bindings.gcp.bucket
+                    metadata:
+                      - name: bucket
+                        value: prod-gcp-bucket
+                      - name: type
+                        value: service_account
+                      - name: project_id
+                        secretKeyRef:
+                          name: demo-app-secrets
+                          key: GCP_PROJECT_ID
+                      - name: private_key
+                        secretKeyRef:
+                          name: demo-app-secrets
+                          key: GCP_PRIVATE_KEY
+                      - name: client_email
+                        secretKeyRef:
+                          name: demo-app-secrets
+                          key: GCP_CLIENT_EMAIL
+    asserts:
+      - isKind:
+          of: Component
+      - equal:
+          path: metadata.name
+          value: gcp-storage
+      - equal:
+          path: spec.type
+          value: bindings.gcp.bucket
+      - equal:
+          path: spec.metadata[0].name
+          value: bucket
+      - equal:
+          path: spec.metadata[0].value
+          value: prod-gcp-bucket
+      - equal:
+          path: spec.metadata[2].name
+          value: project_id
+      - equal:
+          path: spec.metadata[2].secretKeyRef.name
+          value: demo-app-secrets
+
+  - it: should create Azure Dapr component when cloudProvider is azure
+    set:
+      global:
+        appName: demo-app
+        labels:
+          environment: prod
+          team: test
+        annotations:
+          repo: test
+      ciOptions:
+        environment: prod
+        workload_env: true
+        cloudProvider: azure
+      daprComponents:
+        demo-app:
+          enabled: true
+          cloudProviders:
+            azure:
+              components:
+                - name: azure-storage
+                  enabled: true
+                  azure:
+                    type: bindings.azure.blobstorage
+                    metadata:
+                      - name: accountName
+                        secretKeyRef:
+                          name: demo-app-secrets
+                          key: AZURE_STORAGE_ACCOUNT
+                      - name: accountKey
+                        secretKeyRef:
+                          name: demo-app-secrets
+                          key: AZURE_STORAGE_KEY
+                      - name: containerName
+                        value: prod-container
+    asserts:
+      - isKind:
+          of: Component
+      - equal:
+          path: metadata.name
+          value: azure-storage
+      - equal:
+          path: spec.type
+          value: bindings.azure.blobstorage
+      - equal:
+          path: spec.metadata[0].name
+          value: accountName
+      - equal:
+          path: spec.metadata[0].secretKeyRef.name
+          value: demo-app-secrets
+      - equal:
+          path: spec.metadata[2].name
+          value: containerName
+      - equal:
+          path: spec.metadata[2].value
+          value: prod-container
+
+  - it: should not create Dapr component when disabled
+    set:
+      global:
+        appName: demo-app
+        cloudProvider: aws
+      ciOptions:
+        environment: dev
+        workload_env: false
+      daprComponents:
+        demo-app:
+          enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not create Dapr component when component is disabled
+    set:
+      global:
+        appName: demo-app
+        cloudProvider: aws
+        labels:
+          environment: dev
+          team: test
+      ciOptions:
+        environment: dev
+        workload_env: false
+      daprComponents:
+        demo-app:
+          enabled: true
+          cloudProviders:
+            aws:
+              components:
+                - name: object-storage
+                  enabled: false
+                  aws:
+                    type: bindings.aws.s3
+    asserts:
+      - hasDocuments:
+          count: 0
