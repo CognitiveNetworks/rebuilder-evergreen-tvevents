@@ -1,0 +1,138 @@
+{
+    "0": {},
+    "10": {
+        "statusServerAddr": "http://events.tvinteractive.tv/events/lg_prod_2013/"
+    },
+    "12": {
+        "statusServerAddr": "http://events2.tvinteractive.tv/events/vizio/"
+    },
+    "127": {
+        "statusServerAddr": "https://events-asg.tvinteractive.tv/events/vizio_mtk55xx_prod/"
+    },
+    "13": {
+        "statusServerAddr": "http://events2.tvinteractive.tv/events/lg/"
+    },
+    "14": {
+        "statusServerAddr": "http://events2.tvinteractive.tv/events/vizio_dev/"
+    },
+    "15": {
+        "statusServerAddr": "https://events2.tvinteractive.tv/events/lg_dev/"
+    },
+    "16": {
+        "statusServerAddr": "https://events2.tvinteractive.tv/events/tvis_dev/"
+    },
+    "17": {
+        "statusServerAddr": "https://events2.tvinteractive.tv/events/turner_dev/"
+    },
+    "18": {
+        "statusServerAddr": "https://events2.tvinteractive.tv/events/lg_QA/"
+    },
+    "19": {
+        "statusServerAddr": "https://events-lg.tvinteractive.tv/events/lg_prod_2012/"
+    },
+    "2": {
+        "statusServerAddr": "http://events.tvinteractive.tv/events/vizio/"
+    },
+    "20": {
+        "statusServerAddr": "https://events-lg.tvinteractive.tv/events/lg_prod_2013/"
+    },
+    "21": {
+        "statusServerAddr": "https://events2.tvinteractive.tv/events/showtime/"
+    },
+    "29": {
+        "statusServerAddr": "https://events2.tvinteractive.tv/events/lg_ramp_2012/"
+    },
+    "3": {
+        "statusServerAddr": "http://events.tvinteractive.tv/events/lg/"
+    },
+    "30": {
+        "statusServerAddr": "https://events2.tvinteractive.tv/events/lg_ramp_2013/"
+    },
+    "31": {
+        "statusServerAddr": "https://events2.tvinteractive.tv/events/da_dev/"
+    },
+    "32": {
+        "statusServerAddr": "https://events2.tvinteractive.tv/events/lg_ramp2_2012/"
+    },
+    "33": {
+        "statusServerAddr": "https://events2.tvinteractive.tv/events/panasonic_dev/"
+    },
+    "34": {
+        "statusServerAddr": "https://events2.tvinteractive.tv/events/kr_prod_2012/"
+    },
+    "35": {
+        "statusServerAddr": "https://events2.tvinteractive.tv/events/da_ramp_e_2012/"
+    },
+    "36": {
+        "statusServerAddr": "https://events2.tvinteractive.tv/events/da_ramp_w_2012/"
+    },
+    "37": {
+        "statusServerAddr": "https://events2.tvinteractive.tv/events/da_ramp_e_2013/"
+    },
+    "38": {
+        "statusServerAddr": "https://events2.tvinteractive.tv/events/da_ramp_w_2013/"
+    },
+    "39": {
+        "statusServerAddr": "https://events2.tvinteractive.tv/events/vizio_mtk55xx_dev/"
+    },
+    "4": {
+        "statusServerAddr": "http://events.tvinteractive.tv/events/vizio_dev/"
+    },
+    "40": {
+        "statusServerAddr": "https://events2.tvinteractive.tv/events/vizio_mtk55xx_prod/"
+    },
+    "41": {
+        "statusServerAddr": "https://events2.tvinteractive.tv/events/vizio_sigmasx6_dev/"
+    },
+    "42": {
+        "statusServerAddr": "https://events2.tvinteractive.tv/events/vizio_sigmasx6_prod/"
+    },
+    "43": {
+        "statusServerAddr": "https://events2.tvinteractive.tv/events/lg_prod_2014/"
+    },
+    "44": {
+        "statusServerAddr": "https://events2.tvinteractive.tv/events/lg_prod_2014_nc45/"
+    },
+    "45": {
+        "statusServerAddr": "https://events2.tvinteractive.tv/events/lg_prod_2014_webos/"
+    },
+    "46": {
+        "statusServerAddr": "https://events2.tvinteractive.tv/events/kr_prod_2014/"
+    },
+    "47": {
+        "statusServerAddr": "https://events2.tvinteractive.tv/events/vizio_qa/"
+    },
+    "48": {
+        "statusServerAddr": "https://events2.tvinteractive.tv/events/ops-events/"
+    },
+    "5": {
+        "statusServerAddr": "http://events.tvinteractive.tv/events/lg_dev/"
+    },
+    "50": {
+        "statusServerAddr": "https://events9.tvinteractive.tv/events/"
+    },
+    "51": {
+        "statusServerAddr": "https://toss.tvinteractive.tv/control/"
+    },
+    "6": {
+        "statusServerAddr": "http://events.tvinteractive.tv/events/tvis_dev/"
+    },
+    "7": {
+        "statusServerAddr": "http://events.tvinteractive.tv/events/turner_dev/"
+    },
+    "8": {
+        "statusServerAddr": "http://events.tvinteractive.tv/events/lg_QA/"
+    },
+    "9": {
+        "statusServerAddr": "http://events.tvinteractive.tv/events/lg_prod_2012/"
+    },
+    "901": {
+        "statusServerAddr": "https://events-rt.tvinteractive.tv/events/"
+    },
+    "915": {
+        "statusServerAddr": "https://events-rt.tvinteractive.tv/events/lg_dev/"
+    },
+    "default": {
+        "statusServerAddr": "http://events.tvinteractive.tv/events/"
+    }
+}

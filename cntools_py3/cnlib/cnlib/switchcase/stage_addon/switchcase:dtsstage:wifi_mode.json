@@ -1,0 +1,12 @@
+{
+    "VIZIO": {
+        "enabled": 1,
+        "maxAP": 32,
+        "scanFreqSeconds": 0
+    },
+    "default": {
+        "enabled": 0,
+        "maxAP": 32,
+        "scanFreqSeconds": 0
+    }
+}

@@ -1,0 +1,74 @@
+{
+    "1": {
+        "cableDetection": {
+            "counterThreshold": 6,
+            "num": 3,
+            "p1.bottomRightX": 586,
+            "p1.bottomRightY": 196,
+            "p1.topLeftX": 106,
+            "p1.topLeftY": 36,
+            "p2.bottomRightX": 1061,
+            "p2.bottomRightY": 1055,
+            "p2.topLeftX": 107,
+            "p2.topLeftY": 786,
+            "p3.bottomRightX": 1828,
+            "p3.bottomRightY": 296,
+            "p3.topLeftX": 1555,
+            "p3.topLeftY": 51,
+            "timeout": 10,
+            "uploadURL": "https://mvpd.tvinteractive.tv/?id="
+        }
+    },
+    "2": {
+        "cableDetection": {
+            "counterThreshold": 6,
+            "num": 1,
+            "p1.bottomRightX": 1920,
+            "p1.bottomRightY": 1080,
+            "p1.topLeftX": 0,
+            "p1.topLeftY": 0,
+            "timeout": 10,
+            "uploadURL": "https://mvpd.tvinteractive.tv/?id="
+        }
+    },
+    "3": {
+        "cableDetection": {
+            "counterThreshold": 6,
+            "num": 3,
+            "p1.bottomRightX": 586,
+            "p1.bottomRightY": 196,
+            "p1.topLeftX": 106,
+            "p1.topLeftY": 36,
+            "p2.bottomRightX": 1061,
+            "p2.bottomRightY": 1055,
+            "p2.topLeftX": 107,
+            "p2.topLeftY": 786,
+            "p3.bottomRightX": 1828,
+            "p3.bottomRightY": 296,
+            "p3.topLeftX": 1555,
+            "p3.topLeftY": 51,
+            "timeout": 10,
+            "uploadURL": "https://mvpd-stage.tvinteractive.tv/?id="
+        }
+    },
+    "4": {
+        "cableDetection": {
+            "counterThreshold": 6,
+            "num": 3,
+            "p1.bottomRightX": 586,
+            "p1.bottomRightY": 196,
+            "p1.topLeftX": 106,
+            "p1.topLeftY": 36,
+            "p2.bottomRightX": 1061,
+            "p2.bottomRightY": 1055,
+            "p2.topLeftX": 107,
+            "p2.topLeftY": 786,
+            "p3.bottomRightX": 1828,
+            "p3.bottomRightY": 296,
+            "p3.topLeftX": 1555,
+            "p3.topLeftY": 51,
+            "timeout": 10,
+            "uploadURL": "https://mvpd-dev.tvinteractive.tv/?id="
+        }
+    }
+}

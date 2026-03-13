@@ -1,0 +1,422 @@
+{
+    "0": {
+        "flip_mirror_mode": 0,
+        "frame_buffer_offset": 0,
+        "note": "M320SL TESTED"
+    },
+    "1": {
+        "flip_mirror_mode": 2,
+        "frame_buffer_offset": 0,
+        "note": "M370SL"
+    },
+    "10": {
+        "flip_mirror_mode": 0,
+        "frame_buffer_offset": 32,
+        "note": "E3D470VX"
+    },
+    "11": {
+        "flip_mirror_mode": 0,
+        "frame_buffer_offset": 32,
+        "note": "E3D320VX"
+    },
+    "12": {
+        "flip_mirror_mode": 0,
+        "frame_buffer_offset": 32,
+        "note": "E3D420VX"
+    },
+    "13": {
+        "flip_mirror_mode": 0,
+        "frame_buffer_offset": 32,
+        "note": "E3D470VX"
+    },
+    "14": {
+        "flip_mirror_mode": 2,
+        "frame_buffer_offset": 0,
+        "note": "M470SL"
+    },
+    "15": {
+        "flip_mirror_mode": 2,
+        "frame_buffer_offset": 0,
+        "note": "M550SL"
+    },
+    "16": {
+        "flip_mirror_mode": 0,
+        "frame_buffer_offset": 32,
+        "note": "E422VLE"
+    },
+    "17": {
+        "flip_mirror_mode": 0,
+        "frame_buffer_offset": 32,
+        "note": "E472VLE"
+    },
+    "18": {
+        "flip_mirror_mode": 0,
+        "frame_buffer_offset": 32,
+        "note": "E552VLE"
+    },
+    "19": {
+        "flip_mirror_mode": 0,
+        "frame_buffer_offset": 0,
+        "note": "M320SL TESTED"
+    },
+    "2": {
+        "flip_mirror_mode": 2,
+        "frame_buffer_offset": 0,
+        "note": "M420SL"
+    },
+    "20": {
+        "flip_mirror_mode": 2,
+        "frame_buffer_offset": 0,
+        "note": "M370SL"
+    },
+    "21": {
+        "flip_mirror_mode": 2,
+        "frame_buffer_offset": 0,
+        "note": "M420SL"
+    },
+    "22": {
+        "flip_mirror_mode": 3,
+        "frame_buffer_offset": 0,
+        "note": "M420SL"
+    },
+    "23": {
+        "flip_mirror_mode": 3,
+        "frame_buffer_offset": 0,
+        "note": "M550SL"
+    },
+    "24": {
+        "flip_mirror_mode": 3,
+        "frame_buffer_offset": 0,
+        "note": "M420SL"
+    },
+    "25": {
+        "flip_mirror_mode": 3,
+        "frame_buffer_offset": 0,
+        "note": "M550SL"
+    },
+    "26": {
+        "flip_mirror_mode": 2,
+        "frame_buffer_offset": 32,
+        "note": "M3D550SL"
+    },
+    "27": {
+        "flip_mirror_mode": 2,
+        "frame_buffer_offset": 32,
+        "note": "M3D550SL"
+    },
+    "28": {
+        "flip_mirror_mode": 0,
+        "frame_buffer_offset": 32,
+        "note": "E552VLE"
+    },
+    "29": {
+        "flip_mirror_mode": 0,
+        "frame_buffer_offset": 32,
+        "note": "E552VLE"
+    },
+    "3": {
+        "flip_mirror_mode": 2,
+        "frame_buffer_offset": 0,
+        "note": "M470SL"
+    },
+    "30": {
+        "flip_mirror_mode": 0,
+        "frame_buffer_offset": 32,
+        "note": "E422VLE"
+    },
+    "31": {
+        "flip_mirror_mode": 0,
+        "frame_buffer_offset": 32,
+        "note": "E422VLE"
+    },
+    "32": {
+        "flip_mirror_mode": 0,
+        "frame_buffer_offset": 32,
+        "note": "E3D320VX"
+    },
+    "33": {
+        "flip_mirror_mode": 0,
+        "frame_buffer_offset": 32,
+        "note": "E3D320VX"
+    },
+    "34": {
+        "flip_mirror_mode": 0,
+        "frame_buffer_offset": 32,
+        "note": "E3D470VX"
+    },
+    "35": {
+        "flip_mirror_mode": 0,
+        "frame_buffer_offset": 32,
+        "note": "E3D470VX"
+    },
+    "36": {
+        "flip_mirror_mode": 2,
+        "frame_buffer_offset": 0,
+        "note": "M470SL"
+    },
+    "37": {
+        "flip_mirror_mode": 2,
+        "frame_buffer_offset": 0,
+        "note": "M470SL"
+    },
+    "38": {
+        "flip_mirror_mode": 2,
+        "frame_buffer_offset": 0,
+        "note": "M550SL"
+    },
+    "39": {
+        "flip_mirror_mode": 2,
+        "frame_buffer_offset": 0,
+        "note": "M550SL"
+    },
+    "4": {
+        "flip_mirror_mode": 2,
+        "frame_buffer_offset": 0,
+        "note": "M550SL"
+    },
+    "40": {
+        "flip_mirror_mode": 0,
+        "frame_buffer_offset": 32,
+        "note": "M3D651SV"
+    },
+    "41": {
+        "flip_mirror_mode": 0,
+        "frame_buffer_offset": 32,
+        "note": "E552VLE"
+    },
+    "42": {
+        "flip_mirror_mode": 0,
+        "frame_buffer_offset": 32,
+        "note": "E552VLE"
+    },
+    "43": {
+        "flip_mirror_mode": 3,
+        "frame_buffer_offset": 0,
+        "note": "E320i_A0"
+    },
+    "44": {
+        "flip_mirror_mode": 3,
+        "frame_buffer_offset": 0,
+        "note": "E320i_A0"
+    },
+    "45": {
+        "flip_mirror_mode": 0,
+        "frame_buffer_offset": 0,
+        "note": "E320i_A0"
+    },
+    "46": {
+        "flip_mirror_mode": 0,
+        "frame_buffer_offset": 0,
+        "note": "E320i_A0"
+    },
+    "47": {
+        "flip_mirror_mode": 0,
+        "frame_buffer_offset": 32,
+        "note": "E3D470VX"
+    },
+    "48": {
+        "flip_mirror_mode": 3,
+        "frame_buffer_offset": 0,
+        "note": "M550SL"
+    },
+    "49": {
+        "flip_mirror_mode": 3,
+        "frame_buffer_offset": 0,
+        "note": "M550SL"
+    },
+    "5": {
+        "flip_mirror_mode": 0,
+        "frame_buffer_offset": 32,
+        "note": "E422VLE"
+    },
+    "50": {
+        "flip_mirror_mode": 0,
+        "frame_buffer_offset": 32,
+        "note": "M3D651SV"
+    },
+    "51": {
+        "flip_mirror_mode": 2,
+        "frame_buffer_offset": 0,
+        "note": "E420i-A0"
+    },
+    "52": {
+        "flip_mirror_mode": 2,
+        "frame_buffer_offset": 0,
+        "note": "E420i-A0"
+    },
+    "53": {
+        "flip_mirror_mode": 2,
+        "frame_buffer_offset": 0,
+        "note": "E470i-A0"
+    },
+    "54": {
+        "flip_mirror_mode": 2,
+        "frame_buffer_offset": 0,
+        "note": "E470i-A0"
+    },
+    "55": {
+        "flip_mirror_mode": 2,
+        "frame_buffer_offset": 32,
+        "note": "E420d-A0"
+    },
+    "56": {
+        "flip_mirror_mode": 2,
+        "frame_buffer_offset": 32,
+        "note": "E420d-A0"
+    },
+    "57": {
+        "flip_mirror_mode": 3,
+        "frame_buffer_offset": 0,
+        "note": "E320i_A0"
+    },
+    "58": {
+        "flip_mirror_mode": 3,
+        "frame_buffer_offset": 0,
+        "note": "E320i_A0"
+    },
+    "59": {
+        "flip_mirror_mode": 3,
+        "frame_buffer_offset": 0,
+        "note": "E320i_A0"
+    },
+    "6": {
+        "flip_mirror_mode": 0,
+        "frame_buffer_offset": 32,
+        "note": "E472VLE"
+    },
+    "60": {
+        "flip_mirror_mode": 3,
+        "frame_buffer_offset": 0,
+        "note": "E320i_A0"
+    },
+    "61": {
+        "flip_mirror_mode": 3,
+        "frame_buffer_offset": 0,
+        "note": "E320i_A0"
+    },
+    "62": {
+        "flip_mirror_mode": 3,
+        "frame_buffer_offset": 0,
+        "note": "E320i_A0"
+    },
+    "63": {
+        "flip_mirror_mode": 2,
+        "frame_buffer_offset": 0,
+        "note": "E500i-A0"
+    },
+    "64": {
+        "flip_mirror_mode": 2,
+        "frame_buffer_offset": 0,
+        "note": "E500i-A0"
+    },
+    "65": {
+        "flip_mirror_mode": 3,
+        "frame_buffer_offset": 0,
+        "note": "E550i-A0"
+    },
+    "66": {
+        "flip_mirror_mode": 3,
+        "frame_buffer_offset": 0,
+        "note": "E320i_A0"
+    },
+    "67": {
+        "flip_mirror_mode": 0,
+        "frame_buffer_offset": 0,
+        "note": "E320i_A0"
+    },
+    "68": {
+        "flip_mirror_mode": 3,
+        "frame_buffer_offset": 0,
+        "note": "E320i_A0"
+    },
+    "69": {
+        "flip_mirror_mode": 3,
+        "frame_buffer_offset": 0,
+        "note": "E320i_A0"
+    },
+    "7": {
+        "flip_mirror_mode": 0,
+        "frame_buffer_offset": 32,
+        "note": "E552VLE"
+    },
+    "70": {
+        "flip_mirror_mode": 3,
+        "frame_buffer_offset": 0,
+        "note": "E320i_A0"
+    },
+    "71": {
+        "flip_mirror_mode": 3,
+        "frame_buffer_offset": 0,
+        "note": "E320i_A0"
+    },
+    "72": {
+        "flip_mirror_mode": 3,
+        "frame_buffer_offset": 0,
+        "note": "E320i_A0"
+    },
+    "73": {
+        "flip_mirror_mode": 3,
+        "frame_buffer_offset": 0,
+        "note": "E320i_A0"
+    },
+    "74": {
+        "flip_mirror_mode": 3,
+        "frame_buffer_offset": 0,
+        "note": "E320i_A0"
+    },
+    "75": {
+        "flip_mirror_mode": 3,
+        "frame_buffer_offset": 0,
+        "note": "E320i_A0"
+    },
+    "76": {
+        "flip_mirror_mode": 0,
+        "frame_buffer_offset": 0,
+        "note": "E320i_A0"
+    },
+    "77": {
+        "flip_mirror_mode": 0,
+        "frame_buffer_offset": 0,
+        "note": "E320i_A0"
+    },
+    "78": {
+        "flip_mirror_mode": 2,
+        "frame_buffer_offset": 32,
+        "note": "E500d-A0"
+    },
+    "79": {
+        "flip_mirror_mode": 2,
+        "frame_buffer_offset": 32,
+        "note": "E500d-A0"
+    },
+    "8": {
+        "flip_mirror_mode": 0,
+        "frame_buffer_offset": 32,
+        "note": "E3D320VX TESTED"
+    },
+    "80": {
+        "flip_mirror_mode": 3,
+        "frame_buffer_offset": 0,
+        "note": "E550i-A0"
+    },
+    "81": {
+        "flip_mirror_mode": 3,
+        "frame_buffer_offset": 0,
+        "note": "E550i-A0"
+    },
+    "82": {
+        "flip_mirror_mode": 3,
+        "frame_buffer_offset": 32,
+        "note": "E551d-A0"
+    },
+    "83": {
+        "flip_mirror_mode": 3,
+        "frame_buffer_offset": 32,
+        "note": "E551d-A0"
+    },
+    "9": {
+        "flip_mirror_mode": 0,
+        "frame_buffer_offset": 32,
+        "note": "E3D420VX TESTED"
+    }
+}

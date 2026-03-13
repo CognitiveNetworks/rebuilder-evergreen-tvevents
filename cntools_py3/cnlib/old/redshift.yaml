@@ -1,0 +1,8 @@
+readonly: {
+    database: detection,
+    host: redshift.cognet.tv,
+    port: 5439,
+    user: readonly,
+    password: Readonly0,
+    client: psycopg2
+}

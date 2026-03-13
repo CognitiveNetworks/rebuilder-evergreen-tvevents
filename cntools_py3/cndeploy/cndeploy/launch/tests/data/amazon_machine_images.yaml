@@ -1,0 +1,32 @@
+amazon_machine_images:
+    hmv_ssd: &HVM_SSD 'ami-9b32e8e2'  # hvm:ebs-ssd
+    hmv_hrd: &HVM_HRD 'ami-9aaa1cf2'  # hvm:ebs
+
+    reg_ssd: &REG_SSD 'ami-c93a83de'  # ebs-ssd
+    reg_hrd: &REG_HRD 'ami-8caa1ce4'  # ebs
+
+    # Choices for HVM-capable and non-HVM-capable instance types
+    hmv_choices: &HVM_CHOICES [*HVM_SSD, *HVM_HRD, ami-976fcbed]
+    reg_choices: &REG_CHOICES [*REG_SSD, *REG_HRD]
+
+    # Mapping from instance types to the AMI choices and spot bid limit
+    instance_type_to_ami_bid_limit:
+        t1.micro: [*REG_CHOICES, 0.08]
+        t2.small: [*HVM_CHOICES, 0.072]
+        m1.small: [*REG_CHOICES, 0.24]
+        t2.small: [*HVM_CHOICES, 0.07]
+        m3.medium: [*HVM_CHOICES, 0.452]
+        m3.large: [*HVM_CHOICES, 0.896]
+        m3.xlarge: [*HVM_CHOICES, 1.8]
+        m3.2xlarge: [*HVM_CHOICES, 3.6]
+        c3.large: [*HVM_CHOICES, 0.6]
+        c3.xlarge': [*HVM_CHOICES, 1.2]
+        c3.2xlarge': [*HVM_CHOICES, 2.4]
+        c3.8xlarge': [*HVM_CHOICES, 9.6]
+        c4.2xlarge': [*HVM_CHOICES, 2.4]
+        c4.4xlarge': [*HVM_CHOICES, 2.4]
+        r3.xlarge': [*HVM_CHOICES, 1.4]
+        r3.2xlarge': [*HVM_CHOICES, 2.8]
+        r3.4xlarge': [*HVM_CHOICES, 5.6]
+        r4.2xlarge': [*HVM_CHOICES, 1.6]
+        r4.4xlarge': [*HVM_CHOICES, 3.2]

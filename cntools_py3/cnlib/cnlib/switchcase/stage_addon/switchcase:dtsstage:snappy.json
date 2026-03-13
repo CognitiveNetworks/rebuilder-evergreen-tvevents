@@ -1,0 +1,8 @@
+{
+    "LG": {
+        "sendSnappyUdp": 1
+    },
+    "default": {
+        "sendSnappyUdp": 0
+    }
+}
