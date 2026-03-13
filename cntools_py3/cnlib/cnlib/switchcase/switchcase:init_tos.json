@@ -1,0 +1,1 @@
+{"oem:VIZIO": [{"chipset:SIGMA_SX6": {"action": null}}, {"chipset:MTK96": {"chipset_subversion:emulator": {"detectionOn": 1}}}, {"tv_country:!USA": {"detectionOn": 0}}, {"country_code:!US": {"detectionOn": 0}}], "oem:TVIS": {"chipset:LINUX": {"detectionOn": 1}}}

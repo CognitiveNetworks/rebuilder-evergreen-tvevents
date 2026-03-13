@@ -16,9 +16,8 @@ coverage.xml
 htmlcov/
 .pytest_cache/
 
-# Build-time dependencies (cloned / generated locally)
-cntools_py3/
-requirements.txt
+# Build-time dependencies
+# requirements.txt is checked in for Docker builds
 
 # Environment (secrets)
 .env

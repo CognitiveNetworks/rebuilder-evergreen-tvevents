@@ -1,0 +1,378 @@
+{
+    "0": {
+        "skip_modes": {
+            "m1.interval": 250,
+            "m1.key": "default",
+            "m1.off": 0,
+            "m1.on": 1,
+            "m2.interval": 250,
+            "m2.key": "onChannel",
+            "m2.off": 0,
+            "m2.on": 1,
+            "num": 2
+        }
+    },
+    "2": {
+        "blackFrame": {
+            "counterThreshold": 1,
+            "forceCyclesOn": 4,
+            "pixelThreshold": 10
+        },
+        "channelChange": {
+            "counterThreshold": 10,
+            "forceCyclesOn": 4
+        },
+        "freezeFrame": {
+            "counterThreshold": 6,
+            "forceCyclesOn": 4,
+            "fudge": 10,
+            "pixelThreshold": 5
+        },
+        "skip_modes": {
+            "m1.interval": 250,
+            "m1.key": "default",
+            "m1.off": 0,
+            "m1.on": 1,
+            "m2.interval": 250,
+            "m2.key": "onChannel",
+            "m2.off": 0,
+            "m2.on": 1,
+            "m3.interval": 1000,
+            "m3.key": "blackApp1",
+            "m3.off": 1,
+            "m3.on": 1,
+            "m4.interval": 3000,
+            "m4.key": "blackApp2",
+            "m4.off": 1,
+            "m4.on": 1,
+            "m5.interval": 5000,
+            "m5.key": "blackApp3",
+            "m5.off": 1,
+            "m5.on": 1,
+            "m6.interval": 7000,
+            "m6.key": "blackApp4",
+            "m6.off": 1,
+            "m6.on": 1,
+            "m7.interval": 10000,
+            "m7.key": "blackApp5",
+            "m7.off": 1,
+            "m7.on": 1,
+            "num": 7
+        }
+    },
+    "20": {
+        "blackFrame": {
+            "counterThreshold": 1,
+            "forceCyclesOn": 0,
+            "pixelThreshold": 10
+        },
+        "channelChange": {
+            "counterThreshold": 10,
+            "forceCyclesOn": 0
+        },
+        "doQuery": {
+            "dontUseGeneric": 1
+        },
+        "freezeFrame": {
+            "counterThreshold": 6,
+            "forceCyclesOn": 0,
+            "fudge": 10,
+            "pixelThreshold": 5
+        },
+        "skip_modes": {
+            "m1.interval": 750,
+            "m1.key": "default",
+            "m1.off": 300,
+            "m1.on": 30,
+            "m2.interval": 250,
+            "m2.key": "onChannel",
+            "m2.off": 0,
+            "m2.on": 1,
+            "num": 2
+        }
+    },
+    "21": {
+        "blackFrame": {
+            "counterThreshold": 1,
+            "forceCyclesOn": 0,
+            "pixelThreshold": 10
+        },
+        "channelChange": {
+            "counterThreshold": 10,
+            "forceCyclesOn": 0
+        },
+        "doQuery": {
+            "dontUseGeneric": 1
+        },
+        "freezeFrame": {
+            "counterThreshold": 6,
+            "forceCyclesOn": 0,
+            "fudge": 10,
+            "pixelThreshold": 5
+        },
+        "skip_modes": {
+            "m1.interval": 750,
+            "m1.key": "default",
+            "m1.off": 200,
+            "m1.on": 20,
+            "m2.interval": 250,
+            "m2.key": "onChannel",
+            "m2.off": 0,
+            "m2.on": 1,
+            "num": 2
+        }
+    },
+    "3": {
+        "blackFrame": {
+            "counterThreshold": 1,
+            "forceCyclesOn": 4,
+            "pixelThreshold": 10
+        },
+        "channelChange": {
+            "counterThreshold": 10,
+            "forceCyclesOn": 4
+        },
+        "freezeFrame": {
+            "counterThreshold": 6,
+            "forceCyclesOn": 4,
+            "fudge": 10,
+            "pixelThreshold": 5
+        },
+        "skip_modes": {
+            "m1.interval": 250,
+            "m1.key": "default",
+            "m1.off": 0,
+            "m1.on": 1,
+            "m2.interval": 250,
+            "m2.key": "onChannel",
+            "m2.off": 0,
+            "m2.on": 1,
+            "num": 2
+        }
+    },
+    "30": {
+        "blackFrame": {
+            "counterThreshold": 1,
+            "forceCyclesOn": 0,
+            "pixelThreshold": 10
+        },
+        "channelChange": {
+            "counterThreshold": 10,
+            "forceCyclesOn": 0
+        },
+        "doQuery": {
+            "dontUseGeneric": 1
+        },
+        "freezeFrame": {
+            "counterThreshold": 6,
+            "forceCyclesOn": 0,
+            "fudge": 10,
+            "pixelThreshold": 5
+        },
+        "skip_modes": {
+            "m1.interval": 2750,
+            "m1.key": "default",
+            "m1.off": 100,
+            "m1.on": 10,
+            "m2.interval": 250,
+            "m2.key": "onChannel",
+            "m2.off": 0,
+            "m2.on": 1,
+            "num": 2
+        }
+    },
+    "38": {
+        "doQuery": {
+            "dontUseGeneric": 1
+        },
+        "skip_modes": {
+            "m1.interval": 500,
+            "m1.key": "default",
+            "m1.off": 1,
+            "m1.on": 1,
+            "m2.interval": 250,
+            "m2.key": "onChannel",
+            "m2.off": 0,
+            "m2.on": 1,
+            "num": 2
+        }
+    },
+    "39": {
+        "doQuery": {
+            "dontUseGeneric": 1
+        },
+        "skip_modes": {
+            "m1.interval": 500,
+            "m1.key": "default",
+            "m1.off": 2,
+            "m1.on": 2,
+            "m2.interval": 250,
+            "m2.key": "onChannel",
+            "m2.off": 0,
+            "m2.on": 1,
+            "num": 2
+        }
+    },
+    "40": {
+        "blackFrame": {
+            "counterThreshold": 1,
+            "forceCyclesOn": 0,
+            "pixelThreshold": 10
+        },
+        "channelChange": {
+            "counterThreshold": 10,
+            "forceCyclesOn": 0
+        },
+        "doQuery": {
+            "dontUseGeneric": 1
+        },
+        "freezeFrame": {
+            "counterThreshold": 6,
+            "forceCyclesOn": 0,
+            "fudge": 10,
+            "pixelThreshold": 5
+        },
+        "skip_modes": {
+            "m1.interval": 750,
+            "m1.key": "default",
+            "m1.off": 2,
+            "m1.on": 1,
+            "m2.interval": 250,
+            "m2.key": "onChannel",
+            "m2.off": 0,
+            "m2.on": 1,
+            "m3.interval": 1000,
+            "m3.key": "blackApp1",
+            "m3.off": 1,
+            "m3.on": 1,
+            "m4.interval": 3000,
+            "m4.key": "blackApp2",
+            "m4.off": 1,
+            "m4.on": 1,
+            "m5.interval": 5000,
+            "m5.key": "blackApp3",
+            "m5.off": 1,
+            "m5.on": 1,
+            "m6.interval": 7000,
+            "m6.key": "blackApp4",
+            "m6.off": 1,
+            "m6.on": 1,
+            "m7.interval": 10000,
+            "m7.key": "blackApp5",
+            "m7.off": 1,
+            "m7.on": 1,
+            "num": 7
+        }
+    },
+    "41": {
+        "doQuery": {
+            "dontUseGeneric": 1
+        },
+        "skip_modes": {
+            "m1.interval": 750,
+            "m1.key": "default",
+            "m1.off": 4,
+            "m1.on": 2,
+            "m2.interval": 250,
+            "m2.key": "onChannel",
+            "m2.off": 0,
+            "m2.on": 1,
+            "num": 2
+        }
+    },
+    "44": {
+        "blackFrame": {
+            "counterThreshold": 1,
+            "forceCyclesOn": 0,
+            "pixelThreshold": 10
+        },
+        "channelChange": {
+            "counterThreshold": 10,
+            "forceCyclesOn": 0
+        },
+        "doQuery": {
+            "dontUseGeneric": 1
+        },
+        "freezeFrame": {
+            "counterThreshold": 5,
+            "forceCyclesOn": 0,
+            "fudge": 10,
+            "pixelThreshold": 1
+        },
+        "skip_modes": {
+            "m1.interval": 750,
+            "m1.key": "default",
+            "m1.off": 2,
+            "m1.on": 1,
+            "m2.interval": 250,
+            "m2.key": "onChannel",
+            "m2.off": 0,
+            "m2.on": 1,
+            "m3.interval": 1000,
+            "m3.key": "blackApp1",
+            "m3.off": 1,
+            "m3.on": 1,
+            "m4.interval": 3000,
+            "m4.key": "blackApp2",
+            "m4.off": 1,
+            "m4.on": 1,
+            "m5.interval": 5000,
+            "m5.key": "blackApp3",
+            "m5.off": 1,
+            "m5.on": 1,
+            "m6.interval": 7000,
+            "m6.key": "blackApp4",
+            "m6.off": 1,
+            "m6.on": 1,
+            "m7.interval": 10000,
+            "m7.key": "blackApp5",
+            "m7.off": 1,
+            "m7.on": 1,
+            "num": 7
+        }
+    },
+    "49": {
+        "doQuery": {
+            "dontUseGeneric": 1
+        },
+        "skip_modes": {
+            "m1.interval": 250,
+            "m1.key": "default",
+            "m1.off": 0,
+            "m1.on": 1,
+            "m2.interval": 250,
+            "m2.key": "onChannel",
+            "m2.off": 0,
+            "m2.on": 1,
+            "num": 2
+        }
+    },
+    "mvpd": {
+        "blackFrame": {
+            "counterThreshold": 1,
+            "forceCyclesOn": 4,
+            "pixelThreshold": 10
+        },
+        "channelChange": {
+            "counterThreshold": 10,
+            "forceCyclesOn": 4
+        },
+        "freezeFrame": {
+            "counterThreshold": 6,
+            "forceCyclesOn": 4,
+            "fudge": 10,
+            "pixelThreshold": 5
+        },
+        "skip_modes": {
+            "m1.interval": 250,
+            "m1.key": "default",
+            "m1.off": 0,
+            "m1.on": 1,
+            "m2.interval": 250,
+            "m2.key": "onChannel",
+            "m2.off": 0,
+            "m2.on": 1,
+            "num": 2
+        }
+    }
+}

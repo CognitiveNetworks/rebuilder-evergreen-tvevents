@@ -1,0 +1,99 @@
+{
+    "events_mode": 0,
+    "oem:LG": {
+        "chipset:LG": {
+            "chipset_subversion:2012": {
+                "country_code:KR": {
+                    "events_mode": 34
+                },
+                "events_mode": 19
+            },
+            "chipset_subversion:2012_DEV": {
+                "country_code:KR": {
+                    "events_mode": 34
+                },
+                "events_mode": 19
+            },
+            "chipset_subversion:2013": {
+                "country_code:KR": {
+                    "events_mode": 34
+                },
+                "events_mode": 20
+            },
+            "chipset_subversion:2013_DEV": {
+                "country_code:KR": {
+                    "events_mode": 34
+                },
+                "events_mode": 20
+            },
+            "chipset_subversion:2014": {
+                "country_code:KR": {
+                    "events_mode": 46
+                },
+                "events_mode": 43
+            },
+            "chipset_subversion:2015": {
+                "channel_change_detection_mode": 38
+            }
+        },
+        "chipset:MTK_LG": {
+            "chipset_subversion:2012": {
+                "country_code:KR": {
+                    "events_mode": 34
+                },
+                "events_mode": 19
+            },
+            "chipset_subversion:2012_DEV": {
+                "country_code:KR": {
+                    "events_mode": 34
+                },
+                "events_mode": 19
+            },
+            "chipset_subversion:2013": {
+                "country_code:KR": {
+                    "events_mode": 34
+                },
+                "events_mode": 20
+            },
+            "chipset_subversion:2013_DEV": {
+                "country_code:KR": {
+                    "events_mode": 34
+                },
+                "events_mode": 20
+            },
+            "chipset_subversion:2014": {
+                "country_code:KR": {
+                    "events_mode": 46
+                },
+                "events_mode": 43
+            }
+        }
+    },
+    "oem:TVIS": {
+        "chipset:LINUX": {
+            "channel_change_detection_mode": 2,
+            "debug_flag": 1,
+            "events_mode": 15
+        }
+    },
+    "oem:VIZIO": {
+        "chipset:MG121_MG122": {
+            "events_mode": 12
+        },
+        "chipset:MSERIES": {
+            "events_mode": 40
+        },
+        "chipset:MTK95": {
+            "events_mode": 12
+        },
+        "chipset:MTK96": {
+            "events_mode": 12
+        },
+        "chipset:MTK9X": {
+            "events_mode": 12
+        },
+        "chipset:SIGMA_SX6": {
+            "events_mode": 42
+        }
+    }
+}
