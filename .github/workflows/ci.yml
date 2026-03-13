@@ -115,8 +115,8 @@ jobs:
 
       - name: Check complexity
         run: |
-          complexipy src/app -mx 15 -d low
-          complexipy tests -mx 15 -d low
+          complexipy src/app --max-complexity 15
+          complexipy tests --max-complexity 15
 
   helm_lint:
     runs-on: ubuntu-latest
