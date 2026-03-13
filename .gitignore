@@ -22,5 +22,9 @@ htmlcov/
 # Environment (secrets)
 .env
 
+# Rebuild inputs — large lock files from original/adjacent repos
+rebuild-inputs/**/requirements.txt
+rebuild-inputs/**/requirements-dev.txt
+
 # OS
 .DS_Store
